@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getApiData, securePostData } from "../../Services/api";
 import { toast } from "react-toastify";
-
+import Select from "react-select";
 
 function AddHospital() {
     const navigate = useNavigate();
@@ -16,6 +16,8 @@ function AddHospital() {
     const [countries, setCountries] = useState([]);
     const [states, setStates] = useState([]);
     const [cities, setCities] = useState([]);
+    const [category, setCategory] = useState([])
+    const [catData, setCatData] = useState([])
     const [doctorId, setDoctorId] = useState()
     const [byId, setById] = useState(true)
     const [errors, setErrors] = useState({});
@@ -37,6 +39,7 @@ function AddHospital() {
         state: "",
         city: "",
         pinCode: "",
+        category:[],
         status: "Active"
     });
 
@@ -90,6 +93,7 @@ function AddHospital() {
                     state: "",
                     city: "",
                     pinCode: "",
+                    category:[]
                 })
                 navigate(`/hospital-list`)
             } else {
@@ -148,6 +152,7 @@ function AddHospital() {
             newErrors.establishedYear = "Establish id is required";
         if (!form.licenseId)
             newErrors.licenseId = "License id is required";
+        if (form.category?.length == 0) newErrors.category = "Please select at least 1 category";
 
         if (!form.about)
             newErrors.about = "About is required";
@@ -180,6 +185,16 @@ function AddHospital() {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
+    useEffect(() => {
+        getApiData('admin/hospital-category').then((res) => {
+            const formattedData = res.data.map((item) => ({
+                value: item._id,
+                label: item.name
+            }));
+
+            setCatData(formattedData);
+        });
+    }, []);
 
 
 
@@ -297,6 +312,23 @@ function AddHospital() {
 
                                 </div>
                             </div>
+                             <div className="col-lg-6 col-md-6 col-sm-12">
+                                <div className="custom-frm-bx ">
+                                    <label>Categories</label>
+                                    <Select
+                                        options={catData}
+                                        isMulti
+                                        className="custom-select"
+                                        placeholder="Select category..."
+                                        onChange={(selectedOptions) => {
+                                            const ids = selectedOptions.map((item) => item.value);
+                                            setForm({...form,category:ids});
+                                        }}
+                                    />
+
+                                    {errors.category && <small className="text-danger">{errors.category}</small>}
+                                </div>
+                             </div>
 
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="custom-frm-bx">

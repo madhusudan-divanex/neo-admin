@@ -10,12 +10,12 @@ import Swal from "sweetalert2";
 const STATUS_OPTIONS = ["all", "pending", "approved", "completed", "rejected", "cancel"];
 
 function DoctorAppointments() {
-  const [list, setList]       = useState([]);
+  const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage]       = useState(1);
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [search, setSearch]   = useState("");
-  const [status, setStatus]   = useState("all");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("all");
   const limit = 10;
 
   const fetchAppointments = async () => {
@@ -41,7 +41,7 @@ function DoctorAppointments() {
     } catch { Swal.fire("Error", "Failed to delete", "error"); }
   };
 
-  const fmt = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" }) : "—";
+  const fmt = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
   const statusClass = (s) => s === "completed" ? "approved-active" : s === "pending" ? "approved-pending" : s === "approved" ? "approved-visited" : "approved-reject";
 
   return (
@@ -50,10 +50,13 @@ function DoctorAppointments() {
         <div className="d-flex align-items-center justify-content-between">
           <div>
             <h3 className="innr-title mb-2 gradient-text">Doctor Appointments</h3>
-            <nav aria-label="breadcrumb"><ol className="breadcrumb custom-breadcrumb">
-              <li className="breadcrumb-item"><a href="#" className="breadcrumb-link">Dashboard</a></li>
-              <li className="breadcrumb-item active">Doctor Appointments</li>
-            </ol></nav>
+            <div className="admin-breadcrumb">
+
+              <nav aria-label="breadcrumb"><ol className="breadcrumb custom-breadcrumb">
+                <li className="breadcrumb-item"><a href="#" className="breadcrumb-link">Dashboard</a></li>
+                <li className="breadcrumb-item active">Doctor Appointments</li>
+              </ol></nav>
+            </div>
           </div>
         </div>
       </div>
@@ -70,7 +73,7 @@ function DoctorAppointments() {
             </div>
             <div className="dropdown">
               <a href="#" className="thm-btn lt-thm-btn" data-bs-toggle="dropdown"><FontAwesomeIcon icon={faFilter} /> Filter</a>
-              <div className="dropdown-menu dropdown-menu-end user-dropdown tble-action-menu p-3" style={{minWidth:200}}>
+              <div className="dropdown-menu dropdown-menu-end user-dropdown tble-action-menu p-3" style={{ minWidth: 200 }}>
                 <h6 className="mb-2">Status</h6>
                 {STATUS_OPTIONS.map(s => (
                   <div className="form-check new-custom-check" key={s}>
@@ -93,64 +96,64 @@ function DoctorAppointments() {
               <tbody>
                 {loading ? <tr><td colSpan={7} className="text-center py-4">Loading...</td></tr>
                   : list.length === 0 ? <tr><td colSpan={7} className="text-center py-4 text-muted">No appointments found</td></tr>
-                  : list.map((item, i) => (
-                  <tr key={item._id}>
-                    <td>{String((page-1)*limit+i+1).padStart(2,"0")}.</td>
-                    <td><span className="text-muted" style={{fontSize:12}}>#{item._id?.slice(-8)}</span></td>
-                    <td>
-                      <div className="admin-table-bx">
-                        <div className="admin-table-sub-bx">
-                          <img src={item.patientId?.profileImage || "/admin-tb-logo.png"} alt="" />
-                          <div className="admin-table-sub-details">
-                            <h6>{item.patientId?.name || "—"}</h6>
-                            <p>{item.patientId?.contactNumber || "—"}</p>
+                    : list.map((item, i) => (
+                      <tr key={item._id}>
+                        <td>{String((page - 1) * limit + i + 1).padStart(2, "0")}.</td>
+                        <td><span className="text-muted" style={{ fontSize: 12 }}>#{item._id?.slice(-8)}</span></td>
+                        <td>
+                          <div className="admin-table-bx">
+                            <div className="admin-table-sub-bx">
+                              <img src={item.patientId?.profileImage || "/admin-tb-logo.png"} alt="" />
+                              <div className="admin-table-sub-details">
+                                <h6>{item.patientId?.name || "—"}</h6>
+                                <p>{item.patientId?.contactNumber || "—"}</p>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>{fmt(item.date)}</td>
-                    <td>
-                      <div className="admin-table-bx">
-                        <div className="admin-table-sub-bx">
-                          <img src={item.doctorId?.profileImage || "/doctor-avatr.png"} alt="" />
-                          <div className="admin-table-sub-details doctor-title">
-                            <h6>{item.doctorId?.name || "—"}</h6>
-                            <p>{item.doctorId?.contactNumber || "—"}</p>
+                        </td>
+                        <td>{fmt(item.date)}</td>
+                        <td>
+                          <div className="admin-table-bx">
+                            <div className="admin-table-sub-bx">
+                              <img src={item.doctorId?.profileImage || "/doctor-avatr.png"} alt="" />
+                              <div className="admin-table-sub-details doctor-title">
+                                <h6>{item.doctorId?.name || "—"}</h6>
+                                <p>{item.doctorId?.contactNumber || "—"}</p>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td><span className={`approved ${statusClass(item.status)}`}>{item.status}</span></td>
-                    <td>
-                      <div className="dropdown">
-                        <a href="javascript:void(0)" className="grid-dots-btn" data-bs-toggle="dropdown"><TbGridDots /></a>
-                        <ul className="dropdown-menu dropdown-menu-end mt-2 admin-dropdown-card">
-                          <li className="prescription-item">
-                            <NavLink to={`/doctor-appointment-details/${item._id}`} className="prescription-nav">View Details</NavLink>
-                          </li>
-                          <li className="prescription-item">
-                            <a className="prescription-nav text-danger" href="#" onClick={e => { e.preventDefault(); deleteAppt(item._id); }}>
-                              <FontAwesomeIcon icon={faTrash} /> Delete
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                        </td>
+                        <td><span className={`approved ${statusClass(item.status)}`}>{item.status}</span></td>
+                        <td>
+                          <div className="dropdown">
+                            <a href="javascript:void(0)" className="grid-dots-btn" data-bs-toggle="dropdown"><TbGridDots /></a>
+                            <ul className="dropdown-menu dropdown-menu-end mt-2 admin-dropdown-card">
+                              <li className="prescription-item">
+                                <NavLink to={`/doctor-appointment-details/${item._id}`} className="prescription-nav">View Details</NavLink>
+                              </li>
+                              <li className="prescription-item">
+                                <a className="prescription-nav text-danger" href="#" onClick={e => { e.preventDefault(); deleteAppt(item._id); }}>
+                                  <FontAwesomeIcon icon={faTrash} /> Delete
+                                </a>
+                              </li>
+                            </ul>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
               </tbody>
             </table>
           </div>
 
           <div className="custom-pagination-wrapper d-flex justify-content-between align-items-center flex-wrap mt-3">
             <nav><ul className="pagination custom-pagination mb-0">
-              <li className={`page-item ${page===1?"disabled":""}`} onClick={() => setPage(1)}><a className="page-link" href="#"><HiChevronDoubleLeft /></a></li>
-              <li className={`page-item ${page===1?"disabled":""}`} onClick={() => page>1 && setPage(p=>p-1)}><a className="page-link" href="#"><HiChevronLeft /></a></li>
+              <li className={`page-item ${page === 1 ? "disabled" : ""}`} onClick={() => setPage(1)}><a className="page-link" href="#"><HiChevronDoubleLeft /></a></li>
+              <li className={`page-item ${page === 1 ? "disabled" : ""}`} onClick={() => page > 1 && setPage(p => p - 1)}><a className="page-link" href="#"><HiChevronLeft /></a></li>
               <li className="page-item active"><a className="page-link" href="#">{page}</a></li>
-              <li className={`page-item ${page===totalPages?"disabled":""}`} onClick={() => page<totalPages && setPage(p=>p+1)}><a className="page-link" href="#"><HiChevronRight /></a></li>
-              <li className={`page-item ${page===totalPages?"disabled":""}`} onClick={() => setPage(totalPages)}><a className="page-link" href="#"><HiChevronDoubleRight /></a></li>
+              <li className={`page-item ${page === totalPages ? "disabled" : ""}`} onClick={() => page < totalPages && setPage(p => p + 1)}><a className="page-link" href="#"><HiChevronRight /></a></li>
+              <li className={`page-item ${page === totalPages ? "disabled" : ""}`} onClick={() => setPage(totalPages)}><a className="page-link" href="#"><HiChevronDoubleRight /></a></li>
             </ul></nav>
-            <span className="text-muted" style={{fontSize:13}}>Page {page} of {totalPages}</span>
+            <span className="text-muted" style={{ fontSize: 13 }}>Page {page} of {totalPages}</span>
           </div>
         </div>
       </div>

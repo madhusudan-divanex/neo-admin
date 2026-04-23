@@ -25,31 +25,25 @@ function PharmacyList() {
 
   /* ================= LOAD ================= */
   const loadPharmacies = async () => {
-  try {
-    setLoading(true);
-    const res = await api.get("/api/admin/pharmacy", {
-      params: { search, page }
-    });
-    setPharmacies(res.data.data);
-    setTotalPages(res.data.totalPages);
-  } catch {
-    toast.error("Failed to load pharmacies");
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
+      const res = await api.get("/api/admin/pharmacy", {
+        params: { search, page }
+      });
+      setPharmacies(res.data.data);
+      setTotalPages(res.data.totalPages);
+    } catch {
+      toast.error("Failed to load pharmacies");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadPharmacies();
   }, [page]);
 
-  useEffect(() => {
-    const t = setTimeout(() => {
-      setPage(1);
-      loadPharmacies();
-    }, 400);
-    return () => clearTimeout(t);
-  }, [search]);
+ 
 
   /* ================= STATUS ================= */
   const toggleStatus = async (id) => {
@@ -86,149 +80,177 @@ function PharmacyList() {
   return (
     <>
       <div className="main-content flex-grow-1 p-3 overflow-auto">
-        <h3 className="innr-title mb-3 gradient-text">Pharmacy List</h3>
-
-        {/* SEARCH */}
-        <div className="d-flex justify-content-between mb-3">
-          <div className="custom-frm-bx mb-0">
-            <input
-              className="form-control admin-table-search-frm"
-              placeholder="Search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <div className="adm-search-bx">
-              <button className="tp-search-btn">
-                <FontAwesomeIcon icon={faSearch} />
-              </button>
+        <div className="row mb-3">
+          <div className="d-flex align-items-center justify-content-between">
+            <div>
+              <h3 className="innr-title mb-2 gradient-text">Pharmacy List</h3>
+              <div className="admin-breadcrumb">
+                <nav aria-label="breadcrumb">
+                  <ol className="breadcrumb custom-breadcrumb">
+                    <li className="breadcrumb-item">
+                      <a href="#" className="breadcrumb-link">Dashboard</a>
+                    </li>
+                    <li className="breadcrumb-item active">Pharmacy List</li>
+                  </ol>
+                </nav>
+              </div>
             </div>
           </div>
-          <div>
-            <Link to={'/add-pharmacy'} className="thm-btn">Add Pharmacy</Link>
-          </div>
         </div>
-
-        {/* TABLE */}
-        <div className="table-responsive">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Pharmacy</th>
-                <th>Contact Person</th>
-                <th>Address</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {loading && (
+        {/* SEARCH */}
+        <div className='new-mega-card'>
+          <div className="row">
+            <div className="d-flex align-items-center justify-content-between mb-3">
+              <div>
+                <div className="d-flex aligh-content-center mb-3">
+                  <div className="custom-frm-bx mb-0">
+                    <input
+                      className="form-control admin-table-search-frm search-table-frm"
+                      placeholder="Search"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key == "Enter") {
+                          loadPharmacies()
+                        }
+                      }}
+                    />
+                    <div className="adm-search-bx">
+                      <button className="tp-search-btn" onClick={loadPharmacies}>
+                        <FontAwesomeIcon icon={faSearch} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                  <div>
+                    <Link to={'/add-pharmacy'} className="thm-btn">Add Pharmacy</Link>
+                  </div>
+            </div>
+          </div>
+          {/* TABLE */}
+          <div className="table-responsive">
+            <table className="table">
+              <thead>
                 <tr>
-                  <td colSpan="6" className="text-center py-4">
-                    <span className="spinner-border text-primary" role="status"></span>
-                  </td>
+                  <th>#</th>
+                  <th>Pharmacy</th>
+                  <th>Contact Person</th>
+                  <th>Address</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
-              )}
+              </thead>
 
-              {!loading && pharmacies.length === 0 && (
-                <tr>
-                  <td colSpan="6" className="text-center">
-                    No pharmacies found
-                  </td>
-                </tr>
-              )}
-
-              {!loading &&
-                pharmacies.map((p, i) => (
-                  <tr key={p._id}>
-                    <td>{(page - 1) * limit + i + 1}.</td>
-
-                    <td>
-                      <ul className="ad-info-list">
-                        <li className="ad-info-item">{p.name}</li>
-                        <li className="ad-info-item">
-                          <span className="ad-info-title">Mobile :</span> {p.contactNumber}
-                        </li>
-                        <li className="ad-info-item">
-                          <span className="ad-info-title">Email :</span> {p.email}
-                        </li>
-                        {p?.userId?.nh12 && <li className="ad-info-item">
-                          <span className="ad-info-title">Id :</span> {p?.userId?.nh12}
-                        </li>}
-                      </ul>
+              <tbody>
+                {loading && (
+                  <tr>
+                    <td colSpan="6" className="text-center py-4">
+                      <span className="spinner-border text-primary" role="status"></span>
                     </td>
+                  </tr>
+                )}
 
-                    <td>
-                      <div className="admin-table-bx">
-                        <div className="admin-table-sub-details d-flex align-items-center gap-2">
-                          <img src={IMAGE_BASE_URL+p.logo || "/doctor-avatr.png"} alt="" />
-                          <h6>{p.name}</h6>
-                        </div>
+                {!loading && pharmacies.length === 0 && (
+                  <tr>
+                    <td colSpan="6" className="text-center">
+                      No pharmacies found
+                    </td>
+                  </tr>
+                )}
+
+                {!loading &&
+                  pharmacies.map((p, i) => (
+                    <tr key={p._id}>
+                      <td>{(page - 1) * limit + i + 1}.</td>
+
+                      <td>
                         <ul className="ad-info-list">
-                          <li>📞 {p.contactNumber}</li>
-                          <li>✉️ {p.email}</li>
+                          <li className="ad-info-item">{p.name}</li>
+                          <li className="ad-info-item">
+                            <span className="ad-info-title">Mobile :</span> {p.contactNumber}
+                          </li>
+                          <li className="ad-info-item">
+                            <span className="ad-info-title">Email :</span> {p.email}
+                          </li>
+                          {p?.userId?.nh12 && <li className="ad-info-item">
+                            <span className="ad-info-title">Id :</span> {p?.userId?.nh12}
+                          </li>}
                         </ul>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td>{p.address || "-"}</td>
+                      <td>
+                        {p?.contactPerson ?
+                          <div className="admin-table-bx">
+                            <div className="admin-table-sub-details d-flex align-items-center gap-2">
+                              <img src={p?.contactPerson?.photo ? IMAGE_BASE_URL + p?.contactPerson?.photo : "/doctor-avatr.png"} alt="" />
+                              <h6>{p?.contactPerson?.name}</h6>
+                            </div>
+                            <ul className="ad-info-list">
+                              <li>Mobile No: {p?.contactPerson?.contactNumber}</li>
+                              <li>Email: {p?.contactPerson.email}</li>
+                            </ul>
+                          </div> : '-'}
+                      </td>
 
-                    <td>
-                      <span
-                        className={`approved ${
-                          p.status === "verify"
+                      <td>{p?.address ? p?.address?.fullAddress : "-"}</td>
+
+                      <td>
+                        <span
+                          className={`approved text-capitalize ${p.status === "verify"
                             ? "approved-active"
                             : "approved-reject"
-                        }`}
-                        style={{ cursor: "pointer" }}
-                        onClick={() => toggleStatus(p._id)}
-                      >
-                        {p.status}
-                      </span>
-                    </td>
+                            }`}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => toggleStatus(p._id)}
+                        >
+                          {p.status}
+                        </span>
+                      </td>
 
-                    <td>
-                      <div className="dropdown">
-                        <a className="grid-dots-btn" data-bs-toggle="dropdown">
-                          <TbGridDots />
-                        </a>
-                        <ul className="dropdown-menu dropdown-menu-end admin-dropdown-card">
-                          <li className="prescription-item">
-                            <NavLink
-                              to={`/pharmacy-info-details/${p.userId}`}
-                              className="prescription-nav"
-                            >
-                              View Details
-                            </NavLink>
-                          </li>
-                          <li className="prescription-item">
-                            <a
-                              className="prescription-nav"
-                              onClick={() => toggleStatus(p._id)}
-                            >
-                              Toggle Status
-                            </a>
-                          </li>
-                          <li className="prescription-item">
+                      <td>
+                        <div className="dropdown position-static">
+                          <a className="grid-dots-btn" data-bs-toggle="dropdown">
+                            <TbGridDots />
+                          </a>
+                          <ul className="dropdown-menu dropdown-menu-end admin-dropdown-card">
+                            <li className="prescription-item">
+                              <NavLink
+                                to={`/pharmacy-info-details/${p.userId}`}
+                                className="prescription-nav"
+                              >
+                                View Details
+                              </NavLink>
+                            </li>
+                            <li className="prescription-item">
+                              <a
+                                className="prescription-nav"
+                                onClick={() => toggleStatus(p._id)}
+                              >
+                                Toggle Status
+                              </a>
+                            </li>
+                            {/* <li className="prescription-item">
                             <a
                               className="prescription-nav text-danger"
                               onClick={() => deletePharmacy(p._id)}
                             >
                               Delete
                             </a>
-                          </li>
-                        </ul>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
+                          </li> */}
+                          </ul>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
 
-          </table>
+            </table>
+          </div>
+
+
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
-
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
     </>
   );

@@ -9,15 +9,15 @@ import { IMAGE_BASE_URL } from "../../utils/config";
 
 function UserProfile() {
   const navigate = useNavigate();
-  const [profile, setProfile]             = useState(null);
-  const [loading, setLoading]             = useState(true);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword]         = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showCurrent, setShowCurrent]     = useState(false);
-  const [showNew, setShowNew]             = useState(false);
-  const [showConfirm, setShowConfirm]     = useState(false);
-  const [saving, setSaving]               = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -68,12 +68,15 @@ function UserProfile() {
         <div className="d-flex align-items-center justify-content-between">
           <div>
             <h3 className="innr-title mb-2 gradient-text">Admin Profile</h3>
-            <nav aria-label="breadcrumb">
-              <ol className="breadcrumb custom-breadcrumb">
-                <li className="breadcrumb-item"><a href="#" className="breadcrumb-link">Dashboard</a></li>
-                <li className="breadcrumb-item active">Admin Profile</li>
-              </ol>
-            </nav>
+            <div className="admin-breadcrumb">
+
+              <nav aria-label="breadcrumb">
+                <ol className="breadcrumb custom-breadcrumb">
+                  <li className="breadcrumb-item"><a href="#" className="breadcrumb-link">Dashboard</a></li>
+                  <li className="breadcrumb-item active">Admin Profile</li>
+                </ol>
+              </nav>
+            </div>
           </div>
         </div>
       </div>
@@ -106,7 +109,7 @@ function UserProfile() {
                     <div>
                       <h4 className="lg_title">{profile.name || "Admin"}</h4>
                       <p className="first_para text-capitalize">{profile.role}</p>
-                      {profile.unique_id && <p className="text-muted" style={{fontSize:12}}>#{profile.unique_id}</p>}
+                      {profile.unique_id && <p className="text-muted" style={{ fontSize: 12 }}>#{profile.unique_id}</p>}
                     </div>
                   </div>
                   <NavLink to="/edit-profile" className="add-nw-btn nw-thm-btn sub-nw-brd-tbn">
@@ -150,10 +153,10 @@ function UserProfile() {
           <div className="tab-pane fade" id="tab-password" role="tabpanel">
             <div className="row">
               {[
-                { label:"Current Password", val:currentPassword, set:setCurrentPassword, show:showCurrent, toggle:()=>setShowCurrent(v=>!v) },
-                { label:"New Password",     val:newPassword,     set:setNewPassword,     show:showNew,     toggle:()=>setShowNew(v=>!v) },
-                { label:"Confirm New Password", val:confirmPassword, set:setConfirmPassword, show:showConfirm, toggle:()=>setShowConfirm(v=>!v) },
-              ].map(({label,val,set,show,toggle}) => (
+                { label: "Current Password", val: currentPassword, set: setCurrentPassword, show: showCurrent, toggle: () => setShowCurrent(v => !v) },
+                { label: "New Password", val: newPassword, set: setNewPassword, show: showNew, toggle: () => setShowNew(v => !v) },
+                { label: "Confirm New Password", val: confirmPassword, set: setConfirmPassword, show: showConfirm, toggle: () => setShowConfirm(v => !v) },
+              ].map(({ label, val, set, show, toggle }) => (
                 <div className="col-lg-4 col-md-6" key={label}>
                   <div className="custom-frm-bx">
                     <label>{label}</label>

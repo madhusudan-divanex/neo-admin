@@ -87,6 +87,16 @@ function LaboratoryList() {
           <div className="d-flex align-items-center justify-content-between">
             <div>
               <h3 className="innr-title mb-2 gradient-text">Laboratory List</h3>
+              <div className="admin-breadcrumb">
+                <nav aria-label="breadcrumb">
+                  <ol className="breadcrumb custom-breadcrumb">
+                    <li className="breadcrumb-item">
+                      <a href="#" className="breadcrumb-link">Dashboard</a>
+                    </li>
+                    <li className="breadcrumb-item active">Laboratory List</li>
+                  </ol>
+                </nav>
+              </div>
             </div>
           </div>
         </div>
@@ -111,17 +121,17 @@ function LaboratoryList() {
                     </button>
                   </div>
                 </div>
-               
 
-              <div className="dropdown">
-                <a href="#" className="thm-btn lt-thm-btn">
-                  <FontAwesomeIcon icon={faFilter} /> Filter
-                </a>
+
+                {/* <div className="dropdown">
+                  <a href="#" className="thm-btn lt-thm-btn">
+                    <FontAwesomeIcon icon={faFilter} /> Filter
+                  </a>
+                </div> */}
               </div>
+              <div>
+                <Link to={'/add-lab'} className="thm-btn">Add Lab</Link>
               </div>
-               <div>
-                  <Link to={'/add-lab'} className="thm-btn">Add Lab</Link>
-                </div>
             </div>
           </div>
 
@@ -136,83 +146,94 @@ function LaboratoryList() {
                         <th>#</th>
                         <th>Contact Person</th>
                         <th>Laboratory</th>
-                        {/* <th>Address</th> */}
+                        <th>Address</th>
                         <th>Status</th>
                         <th>Action</th>
                       </tr>
                     </thead>
 
-                     <tbody>
-                        {labs.map((lab, i) => (
+                    <tbody>
+                      {labs.map((lab, i) => (
                         <tr key={lab._id}>
-                            <td>{i + 1}</td>
+                          <td>{i + 1}</td>
 
-                            <td>
-                            <h6>{lab.name}</h6>
-                            <div>{lab.contactNumber}</div>
-                            <div>{lab.email}</div>
-                            </td>
+                          <td>
+                            {lab?.contactPerson ?
+                              <div className="admin-table-bx">
+                                <div className="admin-table-sub-details d-flex align-items-center gap-2">
+                                  <img src={lab?.contactPerson?.photo ? IMAGE_BASE_URL + lab?.contactPerson?.photo : "/doctor-avatr.png"} alt="" />
+                                  <h6>{lab?.contactPerson?.name}</h6>
+                                </div>
+                                <ul className="ad-info-list">
+                                  <li>Mobile No: {lab?.contactPerson?.contactNumber}</li>
+                                  <li>Email: {lab?.contactPerson.email}</li>
+                                </ul>
+                              </div> : '-'}
+                          </td>
 
-                            <td>
-                            <div>{lab.name}</div>
-                            <div>{lab?.userId?.nh12}</div>
-                            <div>{lab.email}</div>
-                            </td>
+                          <td>
+                            <ul className="ad-info-list">
+                              <li>{lab.name}</li>
+                              <li>Email : {lab.email}</li>
+                              <li>Mobile No : {lab.contactNumber}</li>
+                              <li>{lab?.userId?.nh12}</li>
+                            </ul>
+                          </td>
 
-                            {/* <td>{lab.address || "-"}</td> */}
+                          <td>{lab?.address ? lab?.address?.fullAddress : "-"}</td>
 
-                            <td>
+                          <td>
                             <span
-                                className="approved approved-active"
-                                style={{ cursor: "pointer" }}
-                                onClick={() => toggleStatus(lab._id)}
+                              className="approved approved-active text-capitalize"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => toggleStatus(lab._id)}
                             >
-                                {lab.status}
+                              {lab.status}
                             </span>
-                            </td>
+                          </td>
 
-                            <td>
-                            <div className="dropdown">
-                                <a className="grid-dots-btn" data-bs-toggle="dropdown">
+                          <td>
+                            <div className="dropdown position-static">
+                              <a className="grid-dots-btn" data-bs-toggle="dropdown">
                                 <TbGridDots />
-                                </a>
-                                <ul className="dropdown-menu dropdown-menu-end">
+                              </a>
+                              <ul className="dropdown-menu dropdown-menu-end">
                                 <li>
-                                    <NavLink
+                                  <NavLink
                                     to={`/lab-info-details/${lab.userId}`}
                                     className="prescription-nav"
-                                    >
+                                  >
                                     View Details
-                                    </NavLink>
+                                  </NavLink>
                                 </li>
                                 <li>
-                                    <a
+                                  <a
                                     className="prescription-nav"
                                     onClick={() => toggleStatus(lab._id)}
-                                    >
+                                  >
                                     Toggle Status
-                                    </a>
+                                  </a>
                                 </li>
-                                <li>
+                                {/* <li>
                                     <a
                                     className="prescription-nav text-danger"
                                     onClick={() => deleteLab(lab._id)}
                                     >
                                     Delete
                                     </a>
-                                </li>
-                                </ul>
+                                </li> */}
+                              </ul>
                             </div>
-                            </td>
+                          </td>
                         </tr>
-                        ))}
+                      ))}
                     </tbody>
 
                   </table>
                 </div>
 
                 {/* ================= PAGINATION ================= */}
-                
+
                 <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
 

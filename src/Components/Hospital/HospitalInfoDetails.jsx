@@ -14,24 +14,24 @@ function HospitalInfoDetails() {
   const { id } = useParams();
   const cardRef = useRef(null);
 
-  const [loading,      setLoading]      = useState(true);
-  const [hospital,     setHospital]     = useState(null);
-  const [contact,      setContact]      = useState(null);
-  const [address,      setAddress]      = useState(null);
-  const [images,       setImages]       = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [hospital, setHospital] = useState(null);
+  const [contact, setContact] = useState(null);
+  const [address, setAddress] = useState(null);
+  const [images, setImages] = useState([]);
   const [certificates, setCertificates] = useState([]);
-  const [doctors,      setDoctors]      = useState([]);
-  const [uniqueId,     setUniqueId]     = useState("");
-  const [activeTab,    setActiveTab]    = useState("info");
+  const [doctors, setDoctors] = useState([]);
+  const [uniqueId, setUniqueId] = useState("");
+  const [activeTab, setActiveTab] = useState("info");
 
   // NeoCard states
-  const [cardName,  setCardName]  = useState("");
-  const [cardId,    setCardId]    = useState("");
+  const [cardName, setCardName] = useState("");
+  const [cardId, setCardId] = useState("");
   const [cardReady, setCardReady] = useState(false);
 
   // Doctor list pagination + search
-  const [docSearch, setDocSearch]   = useState("");
-  const [docPage,   setDocPage]     = useState(1);
+  const [docSearch, setDocSearch] = useState("");
+  const [docPage, setDocPage] = useState(1);
   const DOC_LIMIT = 10;
 
   const loadData = async () => {
@@ -73,21 +73,21 @@ function HospitalInfoDetails() {
       link.download = `NeoCard_${cardId || cardName}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
-    } catch {}
+    } catch { }
   };
 
-  const imgUrl = (path, folder="hospital") =>
+  const imgUrl = (path, folder = "hospital") =>
     path ? `${IMAGE_BASE_URL}/uploads/${folder}/${path}` : null;
 
   // Filtered + paginated doctors
   const filteredDocs = docSearch
     ? doctors.filter(d => d.name?.toLowerCase().includes(docSearch.toLowerCase())
-        || d.contactNumber?.includes(docSearch))
+      || d.contactNumber?.includes(docSearch))
     : doctors;
   const docTotalPages = Math.max(1, Math.ceil(filteredDocs.length / DOC_LIMIT));
-  const pagedDocs = filteredDocs.slice((docPage-1)*DOC_LIMIT, docPage*DOC_LIMIT);
+  const pagedDocs = filteredDocs.slice((docPage - 1) * DOC_LIMIT, docPage * DOC_LIMIT);
 
-  if (loading) return <div className="p-4 text-center"><div className="spinner-border text-primary"/></div>;
+  if (loading) return <div className="p-4 text-center"><div className="spinner-border text-primary" /></div>;
   if (!hospital) return <div className="p-4 text-muted">Hospital not found.</div>;
 
   const statusClass = (s) => s === "approved" ? "approved-active" : s === "pending" ? "approved-pending" : "approved-reject";
@@ -99,13 +99,16 @@ function HospitalInfoDetails() {
           <div className="d-flex align-items-center justify-content-between">
             <div>
               <h3 className="innr-title mb-2 gradient-text">Hospital Details</h3>
-              <nav aria-label="breadcrumb">
-                <ol className="breadcrumb custom-breadcrumb">
-                  <li className="breadcrumb-item"><NavLink to="/" className="breadcrumb-link">Dashboard</NavLink></li>
-                  <li className="breadcrumb-item"><NavLink to="/hospital-list" className="breadcrumb-link">Hospitals</NavLink></li>
-                  <li className="breadcrumb-item active">Details</li>
-                </ol>
-              </nav>
+              <div className="admin-breadcrumb">
+
+                <nav aria-label="breadcrumb">
+                  <ol className="breadcrumb custom-breadcrumb">
+                    <li className="breadcrumb-item"><NavLink to="/" className="breadcrumb-link">Dashboard</NavLink></li>
+                    <li className="breadcrumb-item"><NavLink to="/hospital-list" className="breadcrumb-link">Hospitals</NavLink></li>
+                    <li className="breadcrumb-item active">Details</li>
+                  </ol>
+                </nav>
+              </div>
             </div>
             <span className={`approved ${statusClass(hospital?.kycStatus)}`}>
               {hospital?.kycStatus || "—"}
@@ -119,10 +122,10 @@ function HospitalInfoDetails() {
               {/* ── TABS ── */}
               <div className="employee-tabs">
                 <ul className="nav nav-tabs gap-3 bg-white" id="hosTab" role="tablist">
-                  {[["info","Hospital Info"],["contact","Contact Person"],["doctors","Doctor List"],["card","NeoCard"]].map(([key,label]) => (
+                  {[["info", "Hospital Info"], ["contact", "Contact Person"], ["doctors", "Doctor List"], ["card", "NeoCard"]].map(([key, label]) => (
                     <li className="nav-item" key={key}>
-                      <button className={`nav-link ${activeTab===key?"active":""}`}
-                        onClick={() => { setActiveTab(key); if(key==="card") setTimeout(initCard,100); }}>
+                      <button className={`nav-link ${activeTab === key ? "active" : ""}`}
+                        onClick={() => { setActiveTab(key); if (key === "card") setTimeout(initCard, 100); }}>
                         {label}
                       </button>
                     </li>
@@ -140,7 +143,7 @@ function HospitalInfoDetails() {
                       <div className="doctor-main-profile-card">
                         <div className="lab-personal-pic">
                           <img src={imgUrl(hospital?.logo) || "/profile-tab-avatar.png"} alt=""
-                            onError={e=>{e.target.src="/profile-tab-avatar.png"}} />
+                            onError={e => { e.target.src = "/profile-tab-avatar.png" }} />
                         </div>
                         <div className="doctor-content-details">
                           <div className="doctor-info-heading">
@@ -150,10 +153,10 @@ function HospitalInfoDetails() {
                           <div className="doctor-info-list">
                             {[
                               ["Mobile Number", hospital?.mobileNo],
-                              ["Email",         hospital?.email],
-                              ["GST Number",    hospital?.gstNumber],
-                              ["License ID",    hospital?.licenseId],
-                            ].map(([l,v]) => v ? (
+                              ["Email", hospital?.email],
+                              ["GST Number", hospital?.gstNumber],
+                              ["License ID", hospital?.licenseId],
+                            ].map(([l, v]) => v ? (
                               <div className="doctor-info-item" key={l}>
                                 <h6>{l}</h6><p>{v}</p>
                               </div>
@@ -179,10 +182,10 @@ function HospitalInfoDetails() {
                           {images.map((img, i) => (
                             <div className="col-lg-4 col-md-6 mb-3" key={i}>
                               <div className="lab-thumb-bx">
-                                <h5>{img.type === "thumbnail" ? "Thumbnail" : img.caption || `Image ${i+1}`}</h5>
+                                <h5>{img.type === "thumbnail" ? "Thumbnail" : img.caption || `Image ${i + 1}`}</h5>
                                 <img src={img.fileUrl || imgUrl(img.fileId) || "/pharmacy-pic-one.png"}
-                                  alt="" style={{width:"100%",borderRadius:8,maxHeight:200,objectFit:"cover"}}
-                                  onError={e=>{e.target.src="/pharmacy-pic-one.png"}} />
+                                  alt="" style={{ width: "100%", borderRadius: 8, maxHeight: 200, objectFit: "cover" }}
+                                  onError={e => { e.target.src = "/pharmacy-pic-one.png" }} />
                               </div>
                             </div>
                           ))}
@@ -203,10 +206,10 @@ function HospitalInfoDetails() {
                           <div className="doctor-info-list">
                             {[
                               ["Country", address?.country?.name],
-                              ["State",   address?.state?.name],
-                              ["City",    address?.city?.name],
+                              ["State", address?.state?.name],
+                              ["City", address?.city?.name],
                               ["Pincode", address?.pinCode],
-                            ].map(([l,v]) => (
+                            ].map(([l, v]) => (
                               <div className="doctor-info-item" key={l}><h6>{l}</h6><p>{v || "—"}</p></div>
                             ))}
                           </div>
@@ -228,9 +231,9 @@ function HospitalInfoDetails() {
                                   <p>{cert.licenseNumber || "—"}</p>
                                   {cert.fileUrl && (
                                     <div className="lab-certificate-dwn">
-                                      <h6><FontAwesomeIcon icon={faFilePdf} style={{color:"#EF5350"}}/> {cert.fileName || "Document.pdf"}</h6>
+                                      <h6><FontAwesomeIcon icon={faFilePdf} style={{ color: "#EF5350" }} /> {cert.fileName || "Document.pdf"}</h6>
                                       <a href={cert.fileUrl} target="_blank" rel="noreferrer">
-                                        <button className="notifi-remv-btn"><FontAwesomeIcon icon={faDownload}/></button>
+                                        <button className="notifi-remv-btn"><FontAwesomeIcon icon={faDownload} /></button>
                                       </a>
                                     </div>
                                   )}
@@ -260,9 +263,9 @@ function HospitalInfoDetails() {
                             <div className="doctor-info-list">
                               {[
                                 ["Mobile Number", contact?.mobileNumber],
-                                ["Email",         contact?.email],
-                                ["Gender",        contact?.gender],
-                              ].map(([l,v]) => (
+                                ["Email", contact?.email],
+                                ["Gender", contact?.gender],
+                              ].map(([l, v]) => (
                                 <div className="doctor-info-item" key={l}><h6>{l}</h6><p>{v || "—"}</p></div>
                               ))}
                             </div>
@@ -285,7 +288,7 @@ function HospitalInfoDetails() {
                           value={docSearch}
                           onChange={e => { setDocSearch(e.target.value); setDocPage(1); }} />
                         <div className="adm-search-bx">
-                          <button className="tp-search-btn"><FontAwesomeIcon icon={faSearch}/></button>
+                          <button className="tp-search-btn"><FontAwesomeIcon icon={faSearch} /></button>
                         </div>
                       </div>
                     </div>
@@ -303,13 +306,13 @@ function HospitalInfoDetails() {
                               <tr><td colSpan={7} className="text-center py-4 text-muted">No doctors found</td></tr>
                             ) : pagedDocs.map((doc, i) => (
                               <tr key={doc._id}>
-                                <td>{(docPage-1)*DOC_LIMIT+i+1}.</td>
+                                <td>{(docPage - 1) * DOC_LIMIT + i + 1}.</td>
                                 <td>
                                   <img src={doc.doctorId?.profileImage
-                                    ? imgUrl(doc.doctorId.profileImage,"doctor")
+                                    ? imgUrl(doc.doctorId.profileImage, "doctor")
                                     : "/doctor-avatr.png"}
-                                    alt="" style={{width:40,height:40,borderRadius:"50%",objectFit:"cover"}}
-                                    onError={e=>{e.target.src="/doctor-avatr.png"}} />
+                                    alt="" style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }}
+                                    onError={e => { e.target.src = "/doctor-avatr.png" }} />
                                 </td>
                                 <td>
                                   <div className="admin-table-sub-details">
@@ -396,13 +399,13 @@ function HospitalInfoDetails() {
                         </div>
                         <div>
                           <button className="patient-crd-down-btn" onClick={handleCardDownload}
-                            disabled={!cardReady} style={{opacity: cardReady?1:0.4}}>
+                            disabled={!cardReady} style={{ opacity: cardReady ? 1 : 0.4 }}>
                             <FontAwesomeIcon icon={faDownload} />
                           </button>
                         </div>
                       </div>
                       {!cardReady && (
-                        <p className="text-center text-muted mt-2" style={{fontSize:12}}>
+                        <p className="text-center text-muted mt-2" style={{ fontSize: 12 }}>
                           Name confirm karo aur Generate dabao
                         </p>
                       )}

@@ -117,7 +117,7 @@ function NeoCardGenerate() {
                         <option value="patient">Patient</option>
                         <option value="doctor">Doctor</option>
                         <option value="pharmacy">Pharmacy</option>
-                        <option value="lab">Laboratoryu</option>
+                        <option value="lab">Laboratory</option>
                         <option value="hospital">Hospital</option>
                         {/* <option value=""></option> */}
                       </select>
@@ -179,7 +179,7 @@ function NeoCardGenerate() {
                             "/pharmacy-card.png" :
                             "/card-pic.png"} alt="" />
                     <div className="patient-card-details">
-                      <h4>{cardReady ? name.toUpperCase() : "RAVI KUMAR"}</h4>
+                      <h4>{name?.length>20 ? name.slice(0,17)+'...' : name}</h4>
                       <p>Patient ID</p>
                       <h6>{cardReady ? userId : "PATIENT20240423"}</h6>
                     </div>

@@ -8,15 +8,16 @@ import { useEffect, useState } from "react";
 import api from "../../utils/axios";
 import Swal from "sweetalert2";
 import { IMAGE_BASE_URL } from "../../utils/config";
+import { statusClass } from "../../Services/globalFunction";
 
 function DoctorRequest() {
-  const [list, setList]         = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [page, setPage]         = useState(1);
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [search, setSearch]     = useState("");
-  const [statusFilter, setStatusFilter] = useState("pending");
-  const [rejectModal, setRejectModal]   = useState(null); // doctor obj
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [rejectModal, setRejectModal] = useState(null); // doctor obj
   const [rejectReason, setRejectReason] = useState("");
   const navigate = useNavigate();
   const limit = 10;
@@ -44,6 +45,14 @@ function DoctorRequest() {
       fetchDoctors();
     } catch { Swal.fire("Error", "Failed to approve", "error"); }
   };
+  const handleBlock = async (id) => {
+    const r = await Swal.fire({ title: "Block?", icon: "question", showCancelButton: true, confirmButtonColor: "#00B4B5" });
+    if (!r.isConfirmed) return;
+    try {
+      await api.patch(`/api/admin/doctor/${id}/approve-reject`, { status: "block" });
+      Swal.fire("Blocked!", "", "success"); fetchList();
+    } catch { Swal.fire("Error", "Failed", "error"); }
+  };
 
   const handleReject = async () => {
     if (!rejectReason.trim()) return Swal.fire("Required", "Please enter a reason", "warning");
@@ -57,7 +66,6 @@ function DoctorRequest() {
   };
 
   const fmt = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
-  const statusClass = (s) => s === "approved" ? "approved-active" : s === "rejected" ? "approved-reject" : "approved-pending";
   const calcAge = (dob) => dob ? Math.floor((Date.now() - new Date(dob)) / (365.25 * 24 * 3600 * 1000)) : "—";
 
   return (
@@ -67,10 +75,13 @@ function DoctorRequest() {
           <div className="d-flex align-items-center justify-content-between">
             <div>
               <h3 className="innr-title mb-2 gradient-text">Doctor Request</h3>
-              <nav aria-label="breadcrumb"><ol className="breadcrumb custom-breadcrumb">
-                <li className="breadcrumb-item"><a href="#" className="breadcrumb-link">Dashboard</a></li>
-                <li className="breadcrumb-item active">Doctor Request</li>
-              </ol></nav>
+              <div className="admin-breadcrumb">
+
+                <nav aria-label="breadcrumb"><ol className="breadcrumb custom-breadcrumb">
+                  <li className="breadcrumb-item"><a href="#" className="breadcrumb-link">Dashboard</a></li>
+                  <li className="breadcrumb-item active">Doctor Request</li>
+                </ol></nav>
+              </div>
             </div>
           </div>
         </div>
@@ -89,7 +100,7 @@ function DoctorRequest() {
                 <a href="#" className="thm-btn lt-thm-btn" data-bs-toggle="dropdown"><FontAwesomeIcon icon={faFilter} /> Filter</a>
                 <div className="dropdown-menu dropdown-menu-end user-dropdown tble-action-menu p-3" style={{ minWidth: 180 }}>
                   <h6 className="mb-2">Status</h6>
-                  {["all","pending","approved","rejected"].map(s => (
+                  {["all", "pending", "approved", "rejected","block"].map(s => (
                     <div className="form-check new-custom-check" key={s}>
                       <input className="form-check-input" type="radio" name="dStatus" id={`ds-${s}`}
                         checked={statusFilter === s} onChange={() => { setStatusFilter(s); setPage(1); }} />
@@ -110,50 +121,54 @@ function DoctorRequest() {
                 </tr></thead>
                 <tbody>
                   {loading ? <tr><td colSpan={8} className="text-center py-4">Loading...</td></tr>
-                  : list.length === 0 ? <tr><td colSpan={8} className="text-center py-4 text-muted">No doctor requests found</td></tr>
-                  : list.map((item, i) => (
-                    <tr key={item._id}>
-                      <td>{String((page-1)*limit+i+1).padStart(2,"0")}.</td>
-                      <td><img src={item.profileImage ? `${IMAGE_BASE_URL}/uploads/doctor/${item.profileImage}` : "/doctor-avatr.png"} alt=""
-                        style={{ width:44, height:44, borderRadius:"50%", objectFit:"cover" }}
-                        onError={e => { e.target.src = "/doctor-avatr.png"; }} /></td>
-                      <td><h6 className="mb-0">{item.name}</h6></td>
-                      <td>
-                        <ul className="ad-info-list">
-                          <li className="ad-info-item"><span className="ad-info-title">Mobile:</span> {item.contactNumber || "—"}</li>
-                          <li className="ad-info-item"><span className="ad-info-title">Email:</span> {item.email || "—"}</li>
-                        </ul>
-                      </td>
-                      <td>{calcAge(item.dob)}</td>
-                      <td>{fmt(item.createdAt)}</td>
-                      <td><span className={`approved ${statusClass(item.status)}`}>{item.status}</span></td>
-                      <td>
-                        <div className="dropdown">
-                          <a href="javascript:void(0)" className="grid-dots-btn" data-bs-toggle="dropdown"><TbGridDots /></a>
-                          <ul className="dropdown-menu dropdown-menu-end mt-2 admin-dropdown-card">
-                            <li className="prescription-item">
-                              <NavLink to={`/doctor-info-details/${item.user?._id || item._id}`} className="prescription-nav">View Details</NavLink>
-                            </li>
-                            {item.status === "pending" && <>
-                              <li className="prescription-item">
-                                <a className="prescription-nav status-paid-title" href="#"
-                                  onClick={e => { e.preventDefault(); handleApprove(item._id); }}>
-                                  <FontAwesomeIcon icon={faCheck} /> Approve
-                                </a>
-                              </li>
-                              <li className="prescription-item">
-                                <a className="prescription-nav reject-title" href="#"
-                                  data-bs-toggle="modal" data-bs-target="#doctorRejectModal"
-                                  onClick={e => { e.preventDefault(); setRejectModal(item); setRejectReason(""); }}>
-                                  Reject
-                                </a>
-                              </li>
-                            </>}
-                          </ul>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                    : list.length === 0 ? <tr><td colSpan={8} className="text-center py-4 text-muted">No doctor requests found</td></tr>
+                      : list.map((item, i) => (
+                        <tr key={item._id}>
+                          <td>{String((page - 1) * limit + i + 1).padStart(2, "0")}.</td>
+                          <td><img src={item.profileImage ? `${IMAGE_BASE_URL}/uploads/doctor/${item.profileImage}` : "/doctor-avatr.png"} alt=""
+                            style={{ width: 44, height: 44, borderRadius: "50%", objectFit: "cover" }}
+                            onError={e => { e.target.src = "/doctor-avatr.png"; }} /></td>
+                          <td><h6 className="mb-0">{item.name}</h6></td>
+                          <td>
+                            <ul className="ad-info-list">
+                              <li className="ad-info-item"><span className="ad-info-title">Mobile:</span> {item.contactNumber || "—"}</li>
+                              <li className="ad-info-item"><span className="ad-info-title">Email:</span> {item.email || "—"}</li>
+                            </ul>
+                          </td>
+                          <td>{calcAge(item.dob)}</td>
+                          <td>{fmt(item.createdAt)}</td>
+                          <td><span className={`approved ${statusClass(item.status)} text-capitalize`}>{item.status}</span></td>
+                          <td>
+                            <div className="dropdown position-static">
+                              <a href="javascript:void(0)" className="grid-dots-btn" data-bs-toggle="dropdown"><TbGridDots /></a>
+                              <ul className="dropdown-menu dropdown-menu-end mt-2 admin-dropdown-card">
+                                <li className="prescription-item">
+                                  <NavLink to={`/doctor-info-details/${item.user?._id || item._id}`} className="prescription-nav">View Details</NavLink>
+                                </li>
+                                {item?.status !== "approved" && <li className="prescription-item">
+                                  <a className="prescription-nav status-paid-title" href="#"
+                                    onClick={e => { e.preventDefault(); handleApprove(item._id); }}>
+                                    <FontAwesomeIcon icon={faCheck} /> Approve
+                                  </a>
+                                </li>}
+                                {item?.status !== "block" && <li className="prescription-item">
+                                  <a className="prescription-nav reject-title" href="#"
+                                    onClick={e => { e.preventDefault(); handleBlock(item._id); }}>
+                                    Block
+                                  </a>
+                                </li>}
+                                {item?.status !== "rejected" && <li className="prescription-item">
+                                  <a className="prescription-nav reject-title" href="#"
+                                    data-bs-toggle="modal" data-bs-target="#hospitalRejectModal"
+                                    onClick={e => { e.preventDefault(); setRejectModal(item); setRejectReason(""); }}>
+                                    Reject
+                                  </a>
+                                </li>}
+                              </ul>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                 </tbody>
               </table>
             </div>
@@ -175,7 +190,7 @@ function DoctorRequest() {
               {rejectModal && (
                 <div className="text-center mb-3">
                   <img src={rejectModal.profileImage ? `${IMAGE_BASE_URL}/uploads/doctor/${rejectModal.profileImage}` : "/doctor-avatr.png"}
-                    alt="" style={{width:85,height:85,borderRadius:"50%",objectFit:"cover"}} onError={e=>{e.target.src="/doctor-avatr.png";}} />
+                    alt="" style={{ width: 85, height: 85, borderRadius: "50%", objectFit: "cover" }} onError={e => { e.target.src = "/doctor-avatr.png"; }} />
                   <h6 className="text-black fz-18 pt-2">{rejectModal.name}</h6>
                 </div>
               )}

@@ -7,7 +7,6 @@ function AppLayout() {
   const location = useLocation();
   const path = location.pathname;
   const staticRoute = ['/login']
-  console.log(path)
  
   return (
     <>

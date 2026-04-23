@@ -15,6 +15,7 @@ import toast from "react-hot-toast";
 import api from "../../utils/axios";
 import { formatDate } from "../../utils/date";
 import base_url from "../../Services/baseUrl";
+import { calculateAge } from "../../Services/globalFunction";
 
 
 function DoctorsList() {
@@ -103,28 +104,48 @@ function DoctorsList() {
 
         {/* ================= HEADER ================= */}
         <div className="row mb-3">
-          <h3 className="innr-title mb-2 gradient-text">Doctors list</h3>
+          <div className="d-flex align-items-center justify-content-between">
+            <div>
+              <h3 className="innr-title mb-2 gradient-text">Doctors List</h3>
+              <div className="admin-breadcrumb">
+                <nav aria-label="breadcrumb">
+                  <ol className="breadcrumb custom-breadcrumb">
+                    <li className="breadcrumb-item">
+                      <a href="#" className="breadcrumb-link">Dashboard</a>
+                    </li>
+                    <li className="breadcrumb-item active">Doctors List</li>
+                  </ol>
+                </nav>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="new-mega-card">
+          <div className="row">
 
-          {/* ================= SEARCH ================= */}
-          <div className="d-flex justify-content-between mb-3">
-            <div className="custom-frm-bx mb-0">
-              <input
-                className="form-control admin-table-search-frm"
-                placeholder="Search doctor"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <div className="adm-search-bx">
-                <button className="tp-search-btn">
-                  <FontAwesomeIcon icon={faSearch} />
-                </button>
+            {/* ================= SEARCH ================= */}
+            <div className="d-flex justify-content-between mb-3">
+              <div>
+                <div className="d-flex align-items-center gap-2">
+                  <div className="custom-frm-bx mb-0">
+                    <input
+                      className="form-control admin-table-search-frm search-table-frm"
+                      placeholder="Search doctor"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                    <div className="adm-search-bx">
+                      <button className="tp-search-btn">
+                        <FontAwesomeIcon icon={faSearch} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div>
-              <Link to={'/add-doctor'} className="thm-btn">Add Doctor</Link>
+              <div>
+                <Link to={'/add-doctor'} className="thm-btn">Add Doctor</Link>
+              </div>
             </div>
           </div>
 
@@ -147,8 +168,8 @@ function DoctorsList() {
                     <th>Name</th>
                     <th>Contact</th>
                     <th>DOB</th>
-                    {/* <th>Specialty</th>
-                  <th>Hospital</th> */}
+                    <th>Specialty</th>
+                    <th>Hospital</th>
                     <th>Status</th>
                     <th>Action</th>
                   </tr>
@@ -168,7 +189,8 @@ function DoctorsList() {
                       <td>
                         <img
                           src={d?.profileImage ? `${base_url}/${d?.profileImage}` : "/doctor-avatr.png"}
-                          width="40"
+                          width="100"
+                          // style={{ borderRadius: "50%", objectFit: "cover" }}
                           onError={(e) => {
                             e.target.onerror = null;
                             e.target.src = "/doctor-avatr.png";
@@ -184,14 +206,14 @@ function DoctorsList() {
 
                       <td>
                         <ul className="ad-info-list">
-                          <li> {d.contactNumber || "-"}</li>
-                          <li> {d.email}</li>
+                          <li>Mobile No : {d.contactNumber || "-"}</li>
+                          <li>Email : {d.email}</li>
                         </ul>
                       </td>
 
-                      <td>{formatDate(d.dob)}</td>
-                      {/* <td>{d.specialty || "-"}</td>
-                    <td>{d.hospitalName || "-"}</td> */}
+                      <td>{calculateAge(d?.dob)}</td>
+                      <td>{d?.specialty?.name || "-"}</td>
+                      <td>{d?.about?.hospitalName || "-"}</td>
 
                       {/* ===== STATUS TOGGLE ===== */}
                       <td>
@@ -210,7 +232,7 @@ function DoctorsList() {
 
                       {/* ===== ACTION ===== */}
                       <td>
-                        <div className="dropdown">
+                        <div className="dropdown position-static">
                           <a
                             href="javascript:void(0)"
                             className="grid-dots-btn"
@@ -238,14 +260,14 @@ function DoctorsList() {
                             </a>
                           </li> */}
 
-                            <li>
+                            {/* <li>
                               <a
                                 className="dropdown-item text-danger"
                                 onClick={() => deleteDoctor(d._id)}
                               >
                                 Delete
                               </a>
-                            </li>
+                            </li> */}
                           </ul>
                         </div>
                       </td>
@@ -258,7 +280,7 @@ function DoctorsList() {
 
           <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
-      </div>
+      </div >
     </>
   );
 }

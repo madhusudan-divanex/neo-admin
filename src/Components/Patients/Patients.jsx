@@ -62,7 +62,6 @@ function Patients() {
                         </div>
                     </div>
                 </div>
-
                 <div className='new-mega-card'>
                     <div className="row">
                         <div className="d-flex align-items-center justify-content-between mb-3">
@@ -75,6 +74,11 @@ function Patients() {
                                             placeholder="Search"
                                             value={search}
                                             onChange={(e) => setSearch(e.target.value)}
+                                            onKeyDown={(e)=>{
+                                                if(e.key=="Enter"){
+                                                    handleSearch()
+                                                }
+                                            }}
                                         />
                                         <div className="adm-search-bx">
                                             <button className="tp-search-btn" onClick={handleSearch}>
@@ -151,7 +155,7 @@ function Patients() {
                                                         </td> */}
 
                                                         <td>
-                                                            <div className="dropdown">
+                                                            <div className="dropdown position-static">
                                                                 <a href="javascript:void(0)" className="grid-dots-btn" data-bs-toggle="dropdown">
                                                                     <TbGridDots />
                                                                 </a>
@@ -165,15 +169,16 @@ function Patients() {
                                                                     {/* <li className="prescription-item">
                                                                         <a className="prescription-nav">Inactive</a>
                                                                     </li> */}
-                                                                    <li className="prescription-item">
+                                                                    {/* <li className="prescription-item">
                                                                         <a className="prescription-nav">Delete</a>
-                                                                    </li>
+                                                                    </li> */}
                                                                 </ul>
                                                             </div>
                                                         </td>
                                                     </tr>
                                                 ))
                                             )}
+                                            
                                         </tbody>
                                     </table>
                                 </div>

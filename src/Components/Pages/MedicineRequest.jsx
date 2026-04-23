@@ -66,10 +66,13 @@ function MedicineRequest() {
                     <div className="d-flex align-items-center justify-content-between">
                         <div>
                             <h3 className="innr-title mb-2 gradient-text">Medicine Request</h3>
-                            <nav aria-label="breadcrumb"><ol className="breadcrumb custom-breadcrumb">
-                                <li className="breadcrumb-item"><a href="#" className="breadcrumb-link">Dashboard</a></li>
-                                <li className="breadcrumb-item active">Medicine Request</li>
-                            </ol></nav>
+                            <div className="admin-breadcrumb">
+
+                                <nav aria-label="breadcrumb"><ol className="breadcrumb custom-breadcrumb">
+                                    <li className="breadcrumb-item"><a href="#" className="breadcrumb-link">Dashboard</a></li>
+                                    <li className="breadcrumb-item active">Medicine Request</li>
+                                </ol></nav>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -135,9 +138,9 @@ function MedicineRequest() {
                                                             <a href="javascript:void(0)" className="grid-dots-btn" data-bs-toggle="dropdown"><TbGridDots /></a>
                                                             <ul className="dropdown-menu dropdown-menu-end mt-2 admin-dropdown-card">
                                                                 <li className="prescription-item">
-                                                                    <NavLink to={item?.pharId?._id?
-                                                                    `/pharmacy-info-details/${item.pharId?._id}`
-                                                                :`/hospital-info-details/${item.hospitalId?._id}`} className="prescription-nav">View Details</NavLink>
+                                                                    <NavLink to={item?.pharId?._id ?
+                                                                        `/pharmacy-info-details/${item.pharId?._id}`
+                                                                        : `/hospital-info-details/${item.hospitalId?._id}`} className="prescription-nav">View Details</NavLink>
                                                                 </li>
                                                                 {item?.status == "Pending" &&
                                                                     <><li className="prescription-item">

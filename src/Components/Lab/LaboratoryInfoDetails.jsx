@@ -592,7 +592,7 @@ const loadLabs = async () => {
 
                                                                         {/* Actions */}
                                                                         <td>
-                                                                        <div className="dropdown">
+                                                                        <div className="dropdown position-static">
                                                                             <a
                                                                             href="#"
                                                                             className="grid-dots-btn"

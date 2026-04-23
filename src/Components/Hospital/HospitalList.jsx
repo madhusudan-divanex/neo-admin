@@ -12,6 +12,8 @@ import { Link, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../../utils/axios";
 import Swal from "sweetalert2";
+import { toast } from "react-toastify";
+import base_url from "../../Services/baseUrl";
 
 function HospitalList() {
   const [hospitals, setHospitals] = useState([]);
@@ -49,7 +51,7 @@ function HospitalList() {
 
   useEffect(() => {
     fetchHospitals();
-  }, [page, search]);
+  }, [page,]);
 
   /* ================= DELETE HOSPITAL ================= */
   const deleteHospital = async (id) => {
@@ -83,6 +85,18 @@ function HospitalList() {
   const goNext = () => page < totalPages && setPage(page + 1);
   const goLast = () => page < totalPages && setPage(totalPages);
 
+  const toggleStatus = async (id, status) => {
+    try {
+      setLoading(true);
+      await api.patch(`/api/admin/hospitals/${id}/approve-reject`, { status });
+      toast.success("Status updated");
+      fetchHospitals();
+    } catch {
+      toast.error("Failed to update status");
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="main-content flex-grow-1 p-3 overflow-auto">
@@ -103,7 +117,7 @@ function HospitalList() {
                   </ol>
                 </nav>
               </div>
-           
+
             </div>
           </div>
         </div>
@@ -113,34 +127,39 @@ function HospitalList() {
           <div className="row">
             <div className="d-flex align-items-center justify-content-between mb-3">
               <div className="d-flex gap-3">
-              <div className="custom-frm-bx mb-0">
-                <input
-                  type="text"
-                  className="form-control admin-table-search-frm search-table-frm"
-                  placeholder="Search"
-                  value={search}
-                  onChange={(e) => {
-                    setPage(1);
-                    setSearch(e.target.value);
-                  }}
-                />
-                <div className="adm-search-bx">
-                  <button className="tp-search-btn">
-                    <FontAwesomeIcon icon={faSearch} />
-                  </button>
+                <div className="custom-frm-bx mb-0">
+                  <input
+                    type="text"
+                    className="form-control admin-table-search-frm search-table-frm"
+                    placeholder="Search"
+                    value={search}
+                    onChange={(e) => {
+                      setPage(1);
+                      setSearch(e.target.value);
+                    }}
+                    onKeyDown={(e)=>{
+                      if(e.key=="Enter"){
+                        fetchHospitals()
+                      }
+                    }}
+                  />
+                  <div className="adm-search-bx">
+                    <button className="tp-search-btn" onClick={fetchHospitals}>
+                      <FontAwesomeIcon icon={faSearch} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-                 
 
-              <div className="dropdown">
-                <a href="#" className="thm-btn lt-thm-btn">
-                  <FontAwesomeIcon icon={faFilter} /> Filter
-                </a>
-              </div>
+
+                {/* <div className="dropdown">
+                  <a href="#" className="thm-btn lt-thm-btn">
+                    <FontAwesomeIcon icon={faFilter} /> Filter
+                  </a>
+                </div> */}
               </div>
               <div>
-              <Link to={'/add-hospital'} className="thm-btn">Add Hospital</Link>
-            </div>
+                <Link to={'/add-hospital'} className="thm-btn">Add Hospital</Link>
+              </div>
             </div>
           </div>
 
@@ -205,33 +224,34 @@ function HospitalList() {
                             </td>
 
                             <td>
-                              <div className="admin-table-bx">
-                                <div className="d-flex align-items-center gap-2">
-                                  <img src="/doctor-avatr.png" alt="" />
+                              {item?.contact?<div className="admin-table-bx ">
+                                <div className="d-flex align-items-start  gap-2">
+                                  <img src={item?.contact?.profilePhotoId ?
+                                  `${base_url}/api/file/${item?.contact?.profilePhotoId}`:"/doctor-avatr.png"} alt="" />
                                   <h6>{item.contact?.name || "—"}</h6>
                                 </div>
-                                <div>{item.contact?.email || "—"}</div>
-                              </div>
+                                <div>Mobile No : {item.contact?.mobileNumber || "—"}</div>
+                                <div>Email : {item.contact?.email || "—"}</div>
+                              </div>:'-'}
                             </td>
 
-                            <td>{item.about || "—"}</td>
+                            <td>{item?.address ? item?.address?.fullAddress : "—"}</td>
 
                             <td>
                               <span
-                                className={`approved ${
-                                  item.kycStatus === "approved"
+                                className={`text-capitalize approved ${item.kycStatus === "approved"
                                     ? "approved-active"
-                                    : item.kycStatus === "rejected"
-                                    ? "approved-reject"
-                                    : "approved-pending"
-                                }`}
+                                    : (item.kycStatus === "rejected" || item.kycStatus === "block")
+                                      ? "reject"
+                                      : "approved-pending"
+                                  }`}
                               >
                                 {item.kycStatus}
                               </span>
                             </td>
 
                             <td>
-                              <div className="dropdown">
+                              <div className="dropdown position-static">
                                 <a
                                   href="javascript:void(0)"
                                   className="grid-dots-btn"
@@ -248,8 +268,17 @@ function HospitalList() {
                                       View Details
                                     </NavLink>
                                   </li>
-
                                   <li className="prescription-item">
+                                    <button
+                                      className="prescription-nav w-100"
+                                      onClick={() => toggleStatus(item?._id,item?.kycStatus !== "approved" ? "approved" : "rejected")}
+                                      to={`/hospital-info-details/${item._id}`}
+                                    >
+                                      {item?.kycStatus !== "approved" ? "Approved" : "Rejected"}
+                                    </button>
+                                  </li>
+
+                                  {/* <li className="prescription-item">
                                     <a
                                       href="#"
                                       className="prescription-nav text-danger"
@@ -260,7 +289,7 @@ function HospitalList() {
                                     >
                                       <FontAwesomeIcon icon={faTrash} /> Delete
                                     </a>
-                                  </li>
+                                  </li> */}
                                 </ul>
                               </div>
                             </td>
@@ -272,7 +301,7 @@ function HospitalList() {
                 </div>
 
                 {/* PAGINATION */}
-                
+
                 <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
 

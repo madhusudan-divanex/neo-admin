@@ -43,3 +43,13 @@ export const formatDateTime = (date) => {
     hour12: true,
   });
 };
+export const statusClass = (s) => {
+    const map = {
+      approved: "approved-active",
+      rejected: "reject",
+      block: "reject",
+      verify: "approved-visited",
+    };
+
+    return map[s] || "approved-pending";
+  };

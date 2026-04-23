@@ -3225,6 +3225,9 @@ min-height: 100vh; */
     color: #000000;
     padding: 5px 0;
 }
+.ad-info-list li{
+    padding-bottom: 5px;
+}
 
 .hospital-title{
     color: #052F59;
@@ -3651,11 +3654,12 @@ min-height: 100vh; */
     position: absolute;
     bottom: 20px;
     right: 20px;
-    background-image: url(/qr-code.png);
-    background-repeat: no-repeat;
-    background-size: contain;
-    width: 60px;
-    height: 60px;
+    /* background-image: url(/qr-code.png); */
+    /* background-repeat: no-repeat; */
+    /* background-size: contain; */
+    /* width: 60px;
+    height: 60px; */
+    text-align: end;
 }
 
 .patient-crd-down-btn {
@@ -4541,7 +4545,8 @@ min-height: 100vh; */
 
 .admin-table-bx {
     display: flex;
-    align-items: center;
+    align-items: start;
+    flex-direction: column;
     justify-content: space-between;
 }
 
@@ -4804,4 +4809,7 @@ box-shadow: none;
        border: 1px solid #D4D4D4 !important;
     box-shadow: 0px 2px 0px 0px #00000004 !important;
     font-weight: 600 !important;
+}
+.admin-table-bx div{
+    padding-bottom: 5px;
 }

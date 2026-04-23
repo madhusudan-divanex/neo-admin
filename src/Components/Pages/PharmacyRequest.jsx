@@ -7,15 +7,16 @@ import { NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../../utils/axios";
 import Swal from "sweetalert2";
+import { statusClass } from "../../Services/globalFunction";
 
 function PharmacyRequest() {
-  const [list, setList]       = useState([]);
+  const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage]       = useState(1);
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [search, setSearch]   = useState("");
-  const [statusFilter, setStatusFilter] = useState("pending");
-  const [rejectModal, setRejectModal]   = useState(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [rejectModal, setRejectModal] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
   const limit = 10;
 
@@ -39,6 +40,14 @@ function PharmacyRequest() {
       Swal.fire("Approved!", "", "success"); fetchList();
     } catch { Swal.fire("Error", "Failed", "error"); }
   };
+  const handleBlock = async (id) => {
+    const r = await Swal.fire({ title: "Block?", icon: "question", showCancelButton: true, confirmButtonColor: "#00B4B5" });
+    if (!r.isConfirmed) return;
+    try {
+      await api.patch(`/api/admin/pharmacy/${id}/approve-reject`, { status: "block" });
+      Swal.fire("Blocked!", "", "success"); fetchList();
+    } catch { Swal.fire("Error", "Failed", "error"); }
+  };
 
   const handleReject = async () => {
     if (!rejectReason.trim()) return Swal.fire("Required", "Enter reason", "warning");
@@ -49,8 +58,7 @@ function PharmacyRequest() {
     } catch { Swal.fire("Error", "Failed", "error"); }
   };
 
-  const fmt = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" }) : "—";
-  const statusClass = (s) => s === "approved" ? "approved-active" : s === "rejected" ? "approved-reject" : s === "verify" ? "approved-visited" : "approved-pending";
+  const fmt = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
   return (
     <>
@@ -59,10 +67,13 @@ function PharmacyRequest() {
           <div className="d-flex align-items-center justify-content-between">
             <div>
               <h3 className="innr-title mb-2 gradient-text">Pharmacy Request</h3>
-              <nav aria-label="breadcrumb"><ol className="breadcrumb custom-breadcrumb">
-                <li className="breadcrumb-item"><a href="#" className="breadcrumb-link">Dashboard</a></li>
-                <li className="breadcrumb-item active">Pharmacy Request</li>
-              </ol></nav>
+              <div className="admin-breadcrumb">
+
+                <nav aria-label="breadcrumb"><ol className="breadcrumb custom-breadcrumb">
+                  <li className="breadcrumb-item"><a href="#" className="breadcrumb-link">Dashboard</a></li>
+                  <li className="breadcrumb-item active">Pharmacy Request</li>
+                </ol></nav>
+              </div>
             </div>
           </div>
         </div>
@@ -78,9 +89,9 @@ function PharmacyRequest() {
             </div>
             <div className="dropdown">
               <a href="#" className="thm-btn lt-thm-btn" data-bs-toggle="dropdown"><FontAwesomeIcon icon={faFilter} /> Filter</a>
-              <div className="dropdown-menu dropdown-menu-end user-dropdown tble-action-menu p-3" style={{minWidth:180}}>
+              <div className="dropdown-menu dropdown-menu-end user-dropdown tble-action-menu p-3" style={{ minWidth: 180 }}>
                 <h6 className="mb-2">Status</h6>
-                {["all","pending","verify","approved","rejected"].map(s => (
+                {["all", "pending", "verify", "approved", "rejected"].map(s => (
                   <div className="form-check new-custom-check" key={s}>
                     <input className="form-check-input" type="radio" name="pharmacyStatus" id={`pharmacys-${s}`}
                       checked={statusFilter === s} onChange={() => { setStatusFilter(s); setPage(1); }} />
@@ -97,52 +108,56 @@ function PharmacyRequest() {
                 <thead><tr><th>#</th><th>Name</th><th>Contact</th><th>GST No.</th><th>Request Date</th><th>Status</th><th>Action</th></tr></thead>
                 <tbody>
                   {loading ? <tr><td colSpan={7} className="text-center py-4">Loading...</td></tr>
-                  : list.length === 0 ? <tr><td colSpan={7} className="text-center py-4 text-muted">No requests found</td></tr>
-                  : list.map((item, i) => (
-                    <tr key={item._id}>
-                      <td>{String((page-1)*limit+i+1).padStart(2,"0")}.</td>
-                      <td>
-                        <div className="admin-table-bx">
-                          <div className="admin-table-sub-bx">
-                            <img src="/profile-tab-avatar.png" alt="" />
-                            <div className="admin-table-sub-details">
-                              <h6>{item.name || item.hospitalName || "—"}</h6>
-                              <p>{item.email || "—"}</p>
+                    : list.length === 0 ? <tr><td colSpan={7} className="text-center py-4 text-muted">No requests found</td></tr>
+                      : list.map((item, i) => (
+                        <tr key={item._id}>
+                          <td>{String((page - 1) * limit + i + 1).padStart(2, "0")}.</td>
+                          <td>
+                            <div className="admin-table-bx">
+                              <div className="admin-table-sub-bx">
+                                <img src="/profile-tab-avatar.png" alt="" />
+                                <div className="admin-table-sub-details">
+                                  <h6>{item.name || item.hospitalName || "—"}</h6>
+                                  <p>{item.email || "—"}</p>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{item.contactNumber || item.mobileNo || "—"}</td>
-                      <td>{item.gstNumber || "—"}</td>
-                      <td>{fmt(item.createdAt)}</td>
-                      <td><span className={`approved ${statusClass(item.status)}`}>{item.status}</span></td>
-                      <td>
-                        <div className="dropdown">
-                          <a href="javascript:void(0)" className="grid-dots-btn" data-bs-toggle="dropdown"><TbGridDots /></a>
-                          <ul className="dropdown-menu dropdown-menu-end mt-2 admin-dropdown-card">
-                            <li className="prescription-item">
-                              <NavLink to={`/pharmacy-info-details/${item.userId || item._id}`} className="prescription-nav">View Details</NavLink>
-                            </li>
-                            {(item.status === "pending" || item.status === "verify") && <>
-                              <li className="prescription-item">
-                                <a className="prescription-nav status-paid-title" href="#"
-                                  onClick={e => { e.preventDefault(); handleApprove(item._id); }}>
-                                  <FontAwesomeIcon icon={faCheck} /> Approve
-                                </a>
-                              </li>
-                              <li className="prescription-item">
-                                <a className="prescription-nav reject-title" href="#"
-                                  data-bs-toggle="modal" data-bs-target="#pharmacyRejectModal"
-                                  onClick={e => { e.preventDefault(); setRejectModal(item); setRejectReason(""); }}>
-                                  Reject
-                                </a>
-                              </li>
-                            </>}
-                          </ul>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                          </td>
+                          <td>{item.contactNumber || item.mobileNo || "—"}</td>
+                          <td>{item.gstNumber || "—"}</td>
+                          <td>{fmt(item.createdAt)}</td>
+                          <td><span className={`approved ${statusClass(item.status)} text-capitalize`}>{item.status}</span></td>
+                          <td>
+                            <div className="dropdown position-static">
+                              <a href="javascript:void(0)" className="grid-dots-btn" data-bs-toggle="dropdown"><TbGridDots /></a>
+                              <ul className="dropdown-menu dropdown-menu-end mt-2 admin-dropdown-card">
+                                <li className="prescription-item">
+                                  <NavLink to={`/pharmacy-info-details/${item.userId?._id || item._id}`} className="prescription-nav">View Details</NavLink>
+                                </li>
+                                {item?.status !== "approved" && <li className="prescription-item">
+                                  <a className="prescription-nav status-paid-title" href="#"
+                                    onClick={e => { e.preventDefault(); handleApprove(item._id); }}>
+                                    <FontAwesomeIcon icon={faCheck} /> Approve
+                                  </a>
+                                </li>}
+                                {item?.status !== "block" && <li className="prescription-item">
+                                  <a className="prescription-nav reject-title" href="#"
+                                    onClick={e => { e.preventDefault(); handleBlock(item._id); }}>
+                                    Block
+                                  </a>
+                                </li>}
+                                {item?.status !== "rejected" && <li className="prescription-item">
+                                  <a className="prescription-nav reject-title" href="#"
+                                    data-bs-toggle="modal" data-bs-target="#hospitalRejectModal"
+                                    onClick={e => { e.preventDefault(); setRejectModal(item); setRejectReason(""); }}>
+                                    Reject
+                                  </a>
+                                </li>}
+                              </ul>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                 </tbody>
               </table>
             </div>

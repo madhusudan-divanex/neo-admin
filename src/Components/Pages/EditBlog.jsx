@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { IMAGE_BASE_URL } from "../../utils/config";
 
 function EditBlog() {
-  const editor   = useRef(null);
+  const editor = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const blogData = location.state?.blog; // passed from Blogs list
@@ -17,22 +17,22 @@ function EditBlog() {
     title: "", description: "", content: "", category: "Health",
     author: "NeoHealth", status: "published", tags: ""
   });
-  const [image, setImage]     = useState(null);
+  const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [saving, setSaving]   = useState(false);
-  const [blogId, setBlogId]   = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [blogId, setBlogId] = useState(null);
 
   useEffect(() => {
     if (blogData) {
       setBlogId(blogData._id);
       setForm({
-        title:       blogData.title       || "",
+        title: blogData.title || "",
         description: blogData.description || "",
-        content:     blogData.content     || "",
-        category:    blogData.category    || "Health",
-        author:      blogData.author      || "NeoHealth",
-        status:      blogData.status      || "published",
-        tags:        Array.isArray(blogData.tags) ? blogData.tags.join(", ") : blogData.tags || ""
+        content: blogData.content || "",
+        category: blogData.category || "Health",
+        author: blogData.author || "NeoHealth",
+        status: blogData.status || "published",
+        tags: Array.isArray(blogData.tags) ? blogData.tags.join(", ") : blogData.tags || ""
       });
       if (blogData.image) {
         setPreview(`${IMAGE_BASE_URL}/uploads/blogs/${blogData.image}`);
@@ -76,8 +76,8 @@ function EditBlog() {
     placeholder: "Write content...",
     uploader: { insertImageAsBase64URI: true },
     toolbarAdaptive: false,
-    style: { fontSize:"16px", borderBottomLeftRadius:"10px", borderBottomRightRadius:"10px" },
-    buttons: ["bold","italic","underline","|","fontsize","brush","|","align","ul","ol","|","paragraph","link","image","hr"]
+    style: { fontSize: "16px", borderBottomLeftRadius: "10px", borderBottomRightRadius: "10px" },
+    buttons: ["bold", "italic", "underline", "|", "fontsize", "brush", "|", "align", "ul", "ol", "|", "paragraph", "link", "image", "hr"]
   };
 
   return (
@@ -86,13 +86,16 @@ function EditBlog() {
         <div className="d-flex align-items-center justify-content-between">
           <div>
             <h3 className="innr-title mb-2 gradient-text">Edit Blog</h3>
-            <nav aria-label="breadcrumb">
-              <ol className="breadcrumb custom-breadcrumb">
-                <li className="breadcrumb-item"><NavLink to="/" className="breadcrumb-link">Dashboard</NavLink></li>
-                <li className="breadcrumb-item"><NavLink to="/blogs" className="breadcrumb-link">Blogs</NavLink></li>
-                <li className="breadcrumb-item active">Edit Blog</li>
-              </ol>
-            </nav>
+            <div className="admin-breadcrumb">
+
+              <nav aria-label="breadcrumb">
+                <ol className="breadcrumb custom-breadcrumb">
+                  <li className="breadcrumb-item"><NavLink to="/" className="breadcrumb-link">Dashboard</NavLink></li>
+                  <li className="breadcrumb-item"><NavLink to="/blogs" className="breadcrumb-link">Blogs</NavLink></li>
+                  <li className="breadcrumb-item active">Edit Blog</li>
+                </ol>
+              </nav>
+            </div>
           </div>
         </div>
       </div>
@@ -106,7 +109,7 @@ function EditBlog() {
                 <label>Title *</label>
                 <input type="text" className="form-control admin-table-search-frm"
                   placeholder="Blog title" value={form.title}
-                  onChange={e => setForm(f => ({...f, title:e.target.value}))} required />
+                  onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required />
               </div>
             </div>
 
@@ -115,7 +118,7 @@ function EditBlog() {
                 <label>Short Description *</label>
                 <input type="text" className="form-control admin-table-search-frm"
                   placeholder="Short summary" value={form.description}
-                  onChange={e => setForm(f => ({...f, description:e.target.value}))} required />
+                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))} required />
               </div>
             </div>
 
@@ -123,8 +126,8 @@ function EditBlog() {
               <div className="custom-frm-bx">
                 <label>Category</label>
                 <select className="form-control admin-table-search-frm"
-                  value={form.category} onChange={e => setForm(f => ({...f, category:e.target.value}))}>
-                  {["Health","Wellness","Medical","Nutrition","Fitness","News","Other"].map(c =>
+                  value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
+                  {["Health", "Wellness", "Medical", "Nutrition", "Fitness", "News", "Other"].map(c =>
                     <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
@@ -134,7 +137,7 @@ function EditBlog() {
               <div className="custom-frm-bx">
                 <label>Status</label>
                 <select className="form-control admin-table-search-frm"
-                  value={form.status} onChange={e => setForm(f => ({...f, status:e.target.value}))}>
+                  value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
                   <option value="published">Published</option>
                   <option value="draft">Draft</option>
                 </select>
@@ -145,28 +148,28 @@ function EditBlog() {
               <div className="custom-frm-bx addblog">
                 <label>Full Content</label>
                 <JoditEditor ref={editor} value={form.content} config={config}
-                  onBlur={v => setForm(f => ({...f, content:v}))} onChange={() => {}} />
+                  onBlur={v => setForm(f => ({ ...f, content: v }))} onChange={() => { }} />
               </div>
             </div>
 
             <div className="col-lg-12">
               <div className="custom-frm-bx">
-                <label>Tags <span className="text-muted" style={{fontSize:12}}>(comma separated)</span></label>
+                <label>Tags <span className="text-muted" style={{ fontSize: 12 }}>(comma separated)</span></label>
                 <input type="text" className="form-control admin-table-search-frm"
                   placeholder="health, wellness, tips" value={form.tags}
-                  onChange={e => setForm(f => ({...f, tags:e.target.value}))} />
+                  onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} />
               </div>
             </div>
 
             <div className="col-lg-6">
               <div className="custom-frm-bx">
                 <label>Thumbnail Image</label>
-                <div className="upload-box p-3 justify-content-start" style={{cursor:"pointer"}}
+                <div className="upload-box p-3 justify-content-start" style={{ cursor: "pointer" }}
                   onClick={() => document.getElementById("editBlogImg").click()}>
                   {preview ? (
                     <img src={preview} alt="preview"
-                      style={{width:"100%",maxHeight:160,objectFit:"cover",borderRadius:8}}
-                      onError={e => { e.target.src="/blog-pic.jpg"; }} />
+                      style={{ width: "100%", maxHeight: 160, objectFit: "cover", borderRadius: 8 }}
+                      onError={e => { e.target.src = "/blog-pic.jpg"; }} />
                   ) : (
                     <>
                       <div className="upload-icon mb-2"><IoCloudUploadOutline /></div>

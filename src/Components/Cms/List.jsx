@@ -54,12 +54,15 @@ function List() {
         <div className="d-flex align-items-center justify-content-between mega-content-bx">
           <div>
             <h3 className="innr-title mb-2 gradient-text">CMS Pages</h3>
+            <div className="admin-breadcrumb">
+
             <nav aria-label="breadcrumb">
               <ol className="breadcrumb custom-breadcrumb">
                 <li className="breadcrumb-item"><NavLink to="/" className="breadcrumb-link">Dashboard</NavLink></li>
                 <li className="breadcrumb-item active">CMS Pages</li>
               </ol>
             </nav>
+            </div>
           </div>
           <NavLink to="/add-cms" className="nw-thm-btn">
             <FontAwesomeIcon icon={faPlus} className="me-1" /> Add CMS Page

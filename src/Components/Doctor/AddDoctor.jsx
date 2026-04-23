@@ -212,6 +212,7 @@ function AddDoctor() {
                                     <label htmlFor="">Date of Birth</label>
                                     <input type="date" name="dob"
                                         value={form.dob}
+                                        max={new Date().toISOString().split("T")[0]}
                                         onChange={handleChange} className="form-control new-control-frm" placeholder="Enter " />
                                     {errors.dob && <small className="text-danger">{errors.dob}</small>}
                                 </div>

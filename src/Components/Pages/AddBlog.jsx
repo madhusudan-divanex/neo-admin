@@ -7,15 +7,15 @@ import api from "../../utils/axios";
 import { toast } from "react-toastify";
 
 function AddBlog() {
-  const editor  = useRef(null);
+  const editor = useRef(null);
   const navigate = useNavigate();
   const [form, setForm] = useState({
     title: "", description: "", content: "", category: "Health",
     author: "NeoHealth", status: "published", tags: ""
   });
-  const [image, setImage]     = useState(null);
+  const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [saving, setSaving]   = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const handleImg = (e) => {
     const file = e.target.files[0];
@@ -53,8 +53,8 @@ function AddBlog() {
     placeholder: "Write blog content here...",
     uploader: { insertImageAsBase64URI: true },
     toolbarAdaptive: false,
-    style: { fontSize:"16px", borderBottomLeftRadius:"10px", borderBottomRightRadius:"10px" },
-    buttons: ["bold","italic","underline","|","fontsize","brush","|","align","ul","ol","|","paragraph","link","image","hr"]
+    style: { fontSize: "16px", borderBottomLeftRadius: "10px", borderBottomRightRadius: "10px" },
+    buttons: ["bold", "italic", "underline", "|", "fontsize", "brush", "|", "align", "ul", "ol", "|", "paragraph", "link", "image", "hr"]
   };
 
   return (
@@ -63,13 +63,16 @@ function AddBlog() {
         <div className="d-flex align-items-center justify-content-between">
           <div>
             <h3 className="innr-title mb-2 gradient-text">Add Blog</h3>
-            <nav aria-label="breadcrumb">
-              <ol className="breadcrumb custom-breadcrumb">
-                <li className="breadcrumb-item"><NavLink to="/" className="breadcrumb-link">Dashboard</NavLink></li>
-                <li className="breadcrumb-item"><NavLink to="/blogs" className="breadcrumb-link">Blogs</NavLink></li>
-                <li className="breadcrumb-item active">Add Blog</li>
-              </ol>
-            </nav>
+            <div className="admin-breadcrumb">
+
+              <nav aria-label="breadcrumb">
+                <ol className="breadcrumb custom-breadcrumb">
+                  <li className="breadcrumb-item"><NavLink to="/" className="breadcrumb-link">Dashboard</NavLink></li>
+                  <li className="breadcrumb-item"><NavLink to="/blogs" className="breadcrumb-link">Blogs</NavLink></li>
+                  <li className="breadcrumb-item active">Add Blog</li>
+                </ol>
+              </nav>
+            </div>
           </div>
         </div>
       </div>
@@ -83,7 +86,7 @@ function AddBlog() {
                 <label>Title *</label>
                 <input type="text" className="form-control admin-table-search-frm"
                   placeholder="Enter blog title" value={form.title}
-                  onChange={e => setForm(f => ({...f, title:e.target.value}))} required />
+                  onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required />
               </div>
             </div>
 
@@ -92,7 +95,7 @@ function AddBlog() {
                 <label>Short Description *</label>
                 <input type="text" className="form-control admin-table-search-frm"
                   placeholder="Short summary (shown in listing)" value={form.description}
-                  onChange={e => setForm(f => ({...f, description:e.target.value}))} required />
+                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))} required />
               </div>
             </div>
 
@@ -100,8 +103,8 @@ function AddBlog() {
               <div className="custom-frm-bx">
                 <label>Category</label>
                 <select className="form-control admin-table-search-frm"
-                  value={form.category} onChange={e => setForm(f => ({...f, category:e.target.value}))}>
-                  {["Health","Wellness","Medical","Nutrition","Fitness","News","Other"].map(c =>
+                  value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
+                  {["Health", "Wellness", "Medical", "Nutrition", "Fitness", "News", "Other"].map(c =>
                     <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
@@ -111,7 +114,7 @@ function AddBlog() {
               <div className="custom-frm-bx">
                 <label>Status</label>
                 <select className="form-control admin-table-search-frm"
-                  value={form.status} onChange={e => setForm(f => ({...f, status:e.target.value}))}>
+                  value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
                   <option value="published">Published</option>
                   <option value="draft">Draft</option>
                 </select>
@@ -122,16 +125,16 @@ function AddBlog() {
               <div className="custom-frm-bx addblog">
                 <label>Full Content</label>
                 <JoditEditor ref={editor} value={form.content} config={config}
-                  onBlur={v => setForm(f => ({...f, content:v}))} onChange={() => {}} />
+                  onBlur={v => setForm(f => ({ ...f, content: v }))} onChange={() => { }} />
               </div>
             </div>
 
             <div className="col-lg-12">
               <div className="custom-frm-bx">
-                <label>Tags <span className="text-muted" style={{fontSize:12}}>(comma separated)</span></label>
+                <label>Tags <span className="text-muted" style={{ fontSize: 12 }}>(comma separated)</span></label>
                 <input type="text" className="form-control admin-table-search-frm"
                   placeholder="health, wellness, tips" value={form.tags}
-                  onChange={e => setForm(f => ({...f, tags:e.target.value}))} />
+                  onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} />
               </div>
             </div>
 
@@ -139,11 +142,11 @@ function AddBlog() {
             <div className="col-lg-6">
               <div className="custom-frm-bx">
                 <label>Thumbnail Image</label>
-                <div className="upload-box p-3 justify-content-start" style={{cursor:"pointer"}}
+                <div className="upload-box p-3 justify-content-start" style={{ cursor: "pointer" }}
                   onClick={() => document.getElementById("blogImg").click()}>
                   {preview ? (
                     <img src={preview} alt="preview"
-                      style={{width:"100%",maxHeight:160,objectFit:"cover",borderRadius:8}} />
+                      style={{ width: "100%", maxHeight: 160, objectFit: "cover", borderRadius: 8 }} />
                   ) : (
                     <>
                       <div className="upload-icon mb-2"><IoCloudUploadOutline /></div>

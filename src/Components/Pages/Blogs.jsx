@@ -9,11 +9,11 @@ import Swal from "sweetalert2";
 import { IMAGE_BASE_URL } from "../../utils/config";
 
 function Blogs() {
-  const [list, setList]       = useState([]);
+  const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage]       = useState(1);
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [search, setSearch]   = useState("");
+  const [search, setSearch] = useState("");
   const limit = 10;
   const navigate = useNavigate();
 
@@ -42,10 +42,10 @@ function Blogs() {
     try {
       await api.put(`/api/admin/blogs/${blog._id}`, { status: blog.status === "published" ? "draft" : "published" });
       fetchBlogs();
-    } catch {}
+    } catch { }
   };
 
-  const fmt = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" }) : "—";
+  const fmt = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
   const filtered = search ? list.filter(b => b.title?.toLowerCase().includes(search.toLowerCase())) : list;
 
   return (
@@ -54,10 +54,12 @@ function Blogs() {
         <div className="d-flex align-items-center justify-content-between mega-content-bx">
           <div>
             <h3 className="innr-title mb-2 gradient-text">Blogs</h3>
-            <nav aria-label="breadcrumb"><ol className="breadcrumb custom-breadcrumb">
-              <li className="breadcrumb-item"><NavLink to="/" className="breadcrumb-link">Dashboard</NavLink></li>
-              <li className="breadcrumb-item active">Blogs</li>
-            </ol></nav>
+            <div className="admin-breadcrumb">
+              <nav aria-label="breadcrumb"><ol className="breadcrumb custom-breadcrumb">
+                <li className="breadcrumb-item"><NavLink to="/" className="breadcrumb-link">Dashboard</NavLink></li>
+                <li className="breadcrumb-item active">Blogs</li>
+              </ol></nav>
+            </div>
           </div>
           <NavLink to="/add-blog" className="nw-thm-btn"><FontAwesomeIcon icon={faPlus} className="me-1" /> Add Blog</NavLink>
         </div>
@@ -79,56 +81,56 @@ function Blogs() {
               <tbody>
                 {loading ? <tr><td colSpan={6} className="text-center py-4">Loading...</td></tr>
                   : filtered.length === 0 ? <tr><td colSpan={6} className="text-center py-4 text-muted">No blogs found</td></tr>
-                  : filtered.map((item, i) => (
-                  <tr key={item._id}>
-                    <td>{String((page-1)*limit+i+1).padStart(2,"0")}.</td>
-                    <td>{fmt(item.createdAt)}</td>
-                    <td>
-                      <div className="blog-pic-bx">
-                        <img src={item.image ? `${IMAGE_BASE_URL}blogs/${item.image}` : "/blog-pic.jpg"} alt=""
-                          onError={e => { e.target.src = "/blog-pic.jpg"; }} />
-                      </div>
-                    </td>
-                    <td style={{maxWidth:300}}>{item.title}</td>
-                    <td>
-                      <span className={`approved ${item.status === "published" ? "approved-active" : "approved-pending"}`}>
-                        {item.status}
-                      </span>
-                    </td>
-                    <td>
-                      <ul className="d-flex align-items-center gap-2">
-                        <li>
-                          <div className="switch">
-                            <input type="checkbox" id={`toggle-${item._id}`} checked={item.status === "published"} onChange={() => togglePublish(item)} />
-                            <label htmlFor={`toggle-${item._id}`} className="mb-0"></label>
+                    : filtered.map((item, i) => (
+                      <tr key={item._id}>
+                        <td>{String((page - 1) * limit + i + 1).padStart(2, "0")}.</td>
+                        <td>{fmt(item.createdAt)}</td>
+                        <td>
+                          <div className="blog-pic-bx">
+                            <img src={item.image ? `${IMAGE_BASE_URL}blogs/${item.image}` : "/blog-pic.jpg"} alt=""
+                              onError={e => { e.target.src = "/blog-pic.jpg"; }} />
                           </div>
-                        </li>
-                        <li>
-                          <NavLink to="/edit-blog" state={{ blog: item }} className="notifi-remv-btn">
-                            <FontAwesomeIcon icon={faPen} />
-                          </NavLink>
-                        </li>
-                        <li>
-                          <a href="javascript:void(0)" className="notifi-remv-btn" onClick={() => deleteBlog(item._id)}>
-                            <FontAwesomeIcon icon={faTrash} />
-                          </a>
-                        </li>
-                      </ul>
-                    </td>
-                  </tr>
-                ))}
+                        </td>
+                        <td style={{ maxWidth: 300 }}>{item.title}</td>
+                        <td>
+                          <span className={`approved ${item.status === "published" ? "approved-active" : "approved-pending"}`}>
+                            {item.status}
+                          </span>
+                        </td>
+                        <td>
+                          <ul className="d-flex align-items-center gap-2">
+                            <li>
+                              <div className="switch">
+                                <input type="checkbox" id={`toggle-${item._id}`} checked={item.status === "published"} onChange={() => togglePublish(item)} />
+                                <label htmlFor={`toggle-${item._id}`} className="mb-0"></label>
+                              </div>
+                            </li>
+                            <li>
+                              <NavLink to="/edit-blog" state={{ blog: item }} className="notifi-remv-btn">
+                                <FontAwesomeIcon icon={faPen} />
+                              </NavLink>
+                            </li>
+                            <li>
+                              <a href="javascript:void(0)" className="notifi-remv-btn" onClick={() => deleteBlog(item._id)}>
+                                <FontAwesomeIcon icon={faTrash} />
+                              </a>
+                            </li>
+                          </ul>
+                        </td>
+                      </tr>
+                    ))}
               </tbody>
             </table>
           </div>
           <div className="custom-pagination-wrapper d-flex justify-content-between align-items-center flex-wrap mt-3">
             <nav><ul className="pagination custom-pagination mb-0">
-              <li className={`page-item ${page===1?"disabled":""}`} onClick={() => setPage(1)}><a className="page-link" href="#"><HiChevronDoubleLeft /></a></li>
-              <li className={`page-item ${page===1?"disabled":""}`} onClick={() => page>1 && setPage(p=>p-1)}><a className="page-link" href="#"><HiChevronLeft /></a></li>
+              <li className={`page-item ${page === 1 ? "disabled" : ""}`} onClick={() => setPage(1)}><a className="page-link" href="#"><HiChevronDoubleLeft /></a></li>
+              <li className={`page-item ${page === 1 ? "disabled" : ""}`} onClick={() => page > 1 && setPage(p => p - 1)}><a className="page-link" href="#"><HiChevronLeft /></a></li>
               <li className="page-item active"><a className="page-link" href="#">{page}</a></li>
-              <li className={`page-item ${page===totalPages?"disabled":""}`} onClick={() => page<totalPages && setPage(p=>p+1)}><a className="page-link" href="#"><HiChevronRight /></a></li>
-              <li className={`page-item ${page===totalPages?"disabled":""}`} onClick={() => setPage(totalPages)}><a className="page-link" href="#"><HiChevronDoubleRight /></a></li>
+              <li className={`page-item ${page === totalPages ? "disabled" : ""}`} onClick={() => page < totalPages && setPage(p => p + 1)}><a className="page-link" href="#"><HiChevronRight /></a></li>
+              <li className={`page-item ${page === totalPages ? "disabled" : ""}`} onClick={() => setPage(totalPages)}><a className="page-link" href="#"><HiChevronDoubleRight /></a></li>
             </ul></nav>
-            <span className="text-muted" style={{fontSize:13}}>Page {page} of {totalPages}</span>
+            <span className="text-muted" style={{ fontSize: 13 }}>Page {page} of {totalPages}</span>
           </div>
         </div>
       </div>

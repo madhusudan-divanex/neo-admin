@@ -78,7 +78,7 @@ function LeftSidebar() {
               <Sub to="/laboratory-request" label="Laboratory Request" />
               <Sub to="/pharmacy-request"   label="Pharmacy Request" />
               <Sub to="/hospital-request"   label="Hospital Request" />
-              <Sub to="/edit-request"       label="Edit Requests" />
+              {/* <Sub to="/edit-request"       label="Edit Requests" /> */}
               <Sub to="/medicine-request" label="Medicine Request" />
             </SubMenu>
 
