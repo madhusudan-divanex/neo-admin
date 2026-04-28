@@ -13,6 +13,7 @@ import { Link, NavLink } from "react-router-dom";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
 import api from "../../utils/axios";
+import base_url from "../../Services/baseUrl";
 
 function LaboratoryList() {
 
@@ -161,7 +162,7 @@ function LaboratoryList() {
                             {lab?.contactPerson ?
                               <div className="admin-table-bx">
                                 <div className="admin-table-sub-details d-flex align-items-center gap-2">
-                                  <img src={lab?.contactPerson?.photo ? IMAGE_BASE_URL + lab?.contactPerson?.photo : "/doctor-avatr.png"} alt="" />
+                                  <img src={lab?.contactPerson?.photo ? base_url +'/'+ lab?.contactPerson?.photo : "/doctor-avatr.png"} alt="" />
                                   <h6>{lab?.contactPerson?.name}</h6>
                                 </div>
                                 <ul className="ad-info-list">
@@ -180,7 +181,9 @@ function LaboratoryList() {
                             </ul>
                           </td>
 
-                          <td>{lab?.address ? lab?.address?.fullAddress : "-"}</td>
+                          <td>{lab?.address ? lab?.address?.fullAddress ?
+                            lab?.address?.fullAddress?.slice(0, 47) + '...'
+                            : lab?.address?.fullAddress : "-"}</td>
 
                           <td>
                             <span

@@ -39,7 +39,7 @@ function AddHospital() {
         state: "",
         city: "",
         pinCode: "",
-        category:[],
+        category: [],
         status: "Active"
     });
 
@@ -93,7 +93,7 @@ function AddHospital() {
                     state: "",
                     city: "",
                     pinCode: "",
-                    category:[]
+                    category: []
                 })
                 navigate(`/hospital-list`)
             } else {
@@ -108,7 +108,12 @@ function AddHospital() {
 
     useEffect(() => {
         getApiData("api/location/countries")
-            .then(res => setCountries(res))
+            .then(res => {
+                const data = res.find(item => item?.name == "India")
+                setForm({ ...form, country: data?._id })
+                fetchStates(data?.isoCode)
+                setCountries(res)
+            })
             .catch(err => console.error(err));
 
     }, []);
@@ -312,7 +317,7 @@ function AddHospital() {
 
                                 </div>
                             </div>
-                             <div className="col-lg-6 col-md-6 col-sm-12">
+                            <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="custom-frm-bx ">
                                     <label>Categories</label>
                                     <Select
@@ -322,13 +327,13 @@ function AddHospital() {
                                         placeholder="Select category..."
                                         onChange={(selectedOptions) => {
                                             const ids = selectedOptions.map((item) => item.value);
-                                            setForm({...form,category:ids});
+                                            setForm({ ...form, category: ids });
                                         }}
                                     />
 
                                     {errors.category && <small className="text-danger">{errors.category}</small>}
                                 </div>
-                             </div>
+                            </div>
 
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="custom-frm-bx">

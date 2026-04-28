@@ -2504,6 +2504,7 @@ min-height: 100vh; */
     font-weight: 400;
     font-size: 18px;
     color: #4D667E;
+    word-break: break-all;
 }
 
 .ovrview-bx p {
@@ -3631,7 +3632,7 @@ min-height: 100vh; */
 .nw-patient-details h4,
 .nw-patient-details p,
 .nw-patient-details h6 {
-    color: #000 !important;
+    /* color: #000 !important; */
 }
  
 

@@ -15,7 +15,7 @@ function HospitalRequest() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("draft");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [rejectModal, setRejectModal] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
   const limit = 10;

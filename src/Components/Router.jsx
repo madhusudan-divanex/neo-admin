@@ -135,6 +135,7 @@ import PharmacyCategory from "./Patient Landing/PharmacyCategory";
 import HospitalCategory from "./Patient Landing/HospitalCategory";
 import ScheduleMedicines from "./Pages/ScheduleMedicines";
 import ContactQuery from "./Pages/ContactQuery";
+import SubTestCategory from "./Patient Landing/SubTestCategory";
 
 function Router() {
   const router = createBrowserRouter([
@@ -193,6 +194,7 @@ function Router() {
             { path: "landing/patient-speciality", element: <PtSpeciality /> },
             { path: "landing/patient-testimonial", element: <TestimonialPage /> },
             { path: "landing/patient-test-category", element: <TestCategory /> },
+            { path: "landing/sub-test-category", element: <SubTestCategory /> },
             { path: "landing/patient-hospital-category", element: <HospitalCategory /> },
             { path: "landing/patient-pharmacy-category", element: <PharmacyCategory /> },
             { path: "landing/patient-how-it-work", element: <HowItWorkPage /> },

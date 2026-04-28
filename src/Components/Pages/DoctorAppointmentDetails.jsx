@@ -1,30 +1,40 @@
 import { faEye, faFileExport, faFilePdf, faLocationDot, faMessage, faPhone, faPrint } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { NavLink, useNavigate, useParams } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import api from "../../utils/axios"
 import Loader from "../Common/Loader"
 import { IMAGE_BASE_URL } from "../../utils/config"
+import { getSecureApiData } from "../../Services/api"
+import { calculateAge } from "../../Services/globalFunction"
+import base_url from "../../Services/baseUrl"
 
 function DoctorAppointmentDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [appt, setAppt]       = useState(null)
+  const [appt, setAppt] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [patientData, setPatientData] = useState()
+  const [doctorData, setDoctorData] = useState()
+  const printRef = useRef()
 
   useEffect(() => {
-    if (!id) return
-    ;(async () => {
+    (async () => {
       try {
-        const res = await api.get(`/api/admin/doctor/appointment/${id}`)
-        if (res.data.success) setAppt(res.data.data)
+        const res = await getSecureApiData(`api/admin/doctor/appointment/${id}`)
+        if (res.success) {
+          setAppt(res.appointmentData)
+          setDoctorData(res.doctor)
+          setPatientData(res.patient)
+        }
+
       } catch { } finally { setLoading(false) }
     })()
   }, [id])
 
-  const fmt = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" }) : "—"
-  const fmtFull = (d) => d ? new Date(d).toLocaleString("en-IN", { day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" }) : "—"
-  const calcAge = (dob) => dob ? Math.floor((Date.now() - new Date(dob)) / (365.25*24*3600*1000)) : "—"
+  const fmt = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"
+  const fmtFull = (d) => d ? new Date(d).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"
+  const calcAge = (dob) => dob ? Math.floor((Date.now() - new Date(dob)) / (365.25 * 24 * 3600 * 1000)) : "—"
   const statusClass = (s) => s === "completed" ? "approved-active" : s === "pending" ? "approved-pending" : s === "approved" ? "approved-visited" : "approved-reject"
 
   const imgUrl = (path, folder) => path ? `${IMAGE_BASE_URL}/uploads/${folder}/${path}` : null
@@ -69,29 +79,34 @@ function DoctorAppointmentDetails() {
                   <div className="d-flex align-items-center justify-content-between my-3">
                     <div className="admin-table-bx">
                       <div className="admin-table-sub-bx">
-                        <img src={imgUrl(appt.patientId?.profileImage, "patient") || "/admin-tb-logo.png"}
+                        <img src={patientData?.profileImage ?
+                          `${base_url}/${patientData?.profileImage}` : "/admin-tb-logo.png"}
                           alt="" onError={e => { e.target.src = "/admin-tb-logo.png" }} />
                         <div className="admin-table-sub-details doctor-title">
                           <h6>{appt.patientId?.name || "—"}</h6>
-                          <p>{appt.patientId?.unique_id || "—"}</p>
+                          <p>{appt.patientId?.nh12 || "—"}</p>
                         </div>
                       </div>
                     </div>
                     <div className="neo-health-contact-bx">
-                      <button className="neo-health-contact-btn" title={appt.patientId?.contactNumber}>
+                      <a
+                        href={`tel:${appt.patientId?.contactNumber}`}
+                        className="neo-health-contact-btn"
+                        title={appt.patientId?.contactNumber}
+                      >
                         <FontAwesomeIcon icon={faPhone} />
-                      </button>
+                      </a>
                     </div>
                   </div>
                   <div className="neo-health-user-information my-3">
                     <div className="d-flex align-items-center justify-content-between mb-3">
                       <div>
                         <h6>Age</h6>
-                        <p>{calcAge(appt.demographic?.dob)} Years</p>
+                        <p>{calculateAge(patientData?.dob)} Years</p>
                       </div>
                       <div>
                         <h6>Gender</h6>
-                        <p>{appt.patientId?.gender || "—"}</p>
+                        <p>{patientData?.gender || "—"}</p>
                       </div>
                     </div>
                     <div>
@@ -102,10 +117,18 @@ function DoctorAppointmentDetails() {
                       <h6>Mobile</h6>
                       <p>{appt.patientId?.contactNumber || "—"}</p>
                     </div>
-                    {appt.demographic?.address && (
+                    {patientData?.address && (
                       <div className="mt-2">
                         <h6>Address</h6>
-                        <p>{appt.demographic.address}</p>
+                         <p>
+                      {patientData?.address}
+                      {patientData?.cityId && patientData?.stateId && patientData?.countryId && (
+                        <>
+                          {" "}
+                          , {patientData.cityId?.name}, {patientData.stateId?.name}, {patientData.countryId?.name}
+                        </>
+                      )}
+                    </p>
                       </div>
                     )}
                   </div>
@@ -123,18 +146,19 @@ function DoctorAppointmentDetails() {
                   <div className="d-flex align-items-center justify-content-between my-3">
                     <div className="admin-table-bx">
                       <div className="admin-table-sub-bx">
-                        <img src={imgUrl(appt.doctorId?.profileImage, "doctor") || "/doctor-avatr.png"}
+                        <img src={doctorData?.profileImage ?
+                          `${base_url}/${doctorData?.profileImage}` : "/doctor-avatr.png"}
                           alt="" onError={e => { e.target.src = "/doctor-avatr.png" }} />
                         <div className="admin-table-sub-details doctor-title">
                           <h6>{appt.doctorId?.name || "—"}</h6>
-                          <p>{appt.doctorId?.unique_id || "—"}</p>
+                          <p>{appt.doctorId?.nh12 || "—"}</p>
                         </div>
                       </div>
                     </div>
                     <div className="neo-health-contact-bx">
-                      <button className="neo-health-contact-btn" title={appt.doctorId?.contactNumber}>
+                      <a className="neo-health-contact-btn" href={`tel:${appt.doctorId?.contactNumber}`} title={appt.doctorId?.contactNumber}>
                         <FontAwesomeIcon icon={faPhone} />
-                      </button>
+                      </a>
                     </div>
                   </div>
                   <div className="neo-health-user-information my-3">
@@ -145,7 +169,7 @@ function DoctorAppointmentDetails() {
                       </div>
                       <div>
                         <h6>Specialization</h6>
-                        <p>{appt.docAbout?.specialty?.map(s => s.name).join(", ") || "—"}</p>
+                        <p>{doctorData?.specialty?.name || "—"}</p>
                       </div>
                     </div>
                     {appt.doctorId?.email && (
@@ -236,21 +260,20 @@ function DoctorAppointmentDetails() {
                       </div>
                     </div>
                   ) : (
-                    <p className="text-muted mt-2" style={{fontSize:13}}>No prescription for this appointment</p>
+                    <p className="text-muted mt-2" style={{ fontSize: 13 }}>No prescription for this appointment</p>
                   )}
                 </div>
 
                 {/* Lab Tests */}
-                {(appt.labTest?.lab || appt.labTest?.labTests?.length > 0) && (
+                {appt.labTest?.testCat && (
                   <div className="neo-health-patient-info-card mb-3">
                     <h5>Lab Tests Prescribed</h5>
-                    {appt.labTest?.lab && (
+                    {appt.labTest?.testCat && (
                       <div className="lab-parent-bx my-3">
                         <div className="lab-test-bx">
-                          <img src="/thumb.png" alt="" />
                           <div>
-                            <h6>{appt.labTest.lab?.name || "—"}</h6>
-                            <p>{appt.labTest.lab?.contactNumber || "—"}</p>
+                            <h6>{appt.labTest.testCat?.name || "—"}</h6>
+                            {appt.labTest?.subCat?.map(item => <p>{item?.name || "—"}</p>)}
                           </div>
                         </div>
                       </div>
@@ -259,7 +282,7 @@ function DoctorAppointmentDetails() {
                       <div className="prescriptin-bx" key={i}>
                         <div className="prescriptin-content">
                           <div className="prescriptin-picture lab-test-bx">
-                            <img src="/test-tubs.svg" alt="" style={{width:50, height:50}} />
+                            <img src="/test-tubs.svg" alt="" style={{ width: 50, height: 50 }} />
                             <div>
                               <h6 className="fz-18 fw-700 mb-0">{test?.name || test?.shortName || "—"}</h6>
                             </div>

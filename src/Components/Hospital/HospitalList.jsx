@@ -235,7 +235,9 @@ function HospitalList() {
                               </div>:'-'}
                             </td>
 
-                            <td>{item?.address ? item?.address?.fullAddress : "—"}</td>
+                            <td>{item?.address ? 
+                            item?.address?.fullAddress?.length > 50 ? item?.address?.fullAddress?.slice(0,47)+'...' 
+                            :item?.address?.fullAddress: "—"}</td>
 
                             <td>
                               <span

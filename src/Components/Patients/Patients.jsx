@@ -7,6 +7,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link, NavLink } from "react-router-dom";
 import api from "../../utils/axios";
 import toast from "react-hot-toast";
+import base_url from "../../Services/baseUrl";
+import { calculateAge, statusClass } from "../../Services/globalFunction";
+import { updateApiData } from "../../Services/api";
 
 function Patients() {
 
@@ -41,6 +44,21 @@ function Patients() {
     const handleSearch = () => {
         fetchPatients(1, search);
     };
+    const toggleStatus = async (patientId,status) => {
+    try {
+      setLoading(true);
+      const res=await updateApiData(`api/admin/patients/status`,{patientId,status});
+      if(res.success){
+          toast.success("Status updated");
+          fetchPatients();
+      }else{
+        toast.error(res.message)
+      }
+    } catch {
+      toast.error("Failed to update status");
+      setLoading(false);
+    }
+  };
 
     return (
         <>
@@ -74,8 +92,8 @@ function Patients() {
                                             placeholder="Search"
                                             value={search}
                                             onChange={(e) => setSearch(e.target.value)}
-                                            onKeyDown={(e)=>{
-                                                if(e.key=="Enter"){
+                                            onKeyDown={(e) => {
+                                                if (e.key == "Enter") {
                                                     handleSearch()
                                                 }
                                             }}
@@ -88,9 +106,9 @@ function Patients() {
                                     </div>
                                 </div>
                             </div>
-                                <div>
-                                    <Link to={'/add-patient'} className="thm-btn">Add Patient</Link>
-                                </div>
+                            <div>
+                                <Link to={'/add-patient'} className="thm-btn">Add Patient</Link>
+                            </div>
                         </div>
                     </div>
 
@@ -107,7 +125,7 @@ function Patients() {
                                                 <th>Contact</th>
                                                 <th>Age</th>
                                                 <th>Gender</th>
-                                                {/* <th>Status</th> */}
+                                                <th>Status</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -125,7 +143,11 @@ function Patients() {
                                                         <td>
                                                             <div className="admin-table-bx">
                                                                 <div className="admin-table-sub-bx">
-                                                                    <img src="/admin-tb-logo.png" alt="" />
+                                                                    <img src={p?.profileImage ? `${base_url}/${p?.profileImage}` : "/admin-tb-logo.png"} alt=""
+                                                                        onError={(e) => {
+                                                                            e.target.onerror = null;
+                                                                            e.target.src = "/admin-tb-logo.png";
+                                                                        }} />
                                                                     <div className="admin-table-sub-details">
                                                                         <h6>{p.userId?.name}</h6>
                                                                         <p>{p.userId?.nh12}</p>
@@ -145,14 +167,14 @@ function Patients() {
                                                             </ul>
                                                         </td>
 
-                                                        <td>-</td>
+                                                        <td>{calculateAge(p?.demographic?.dob)}</td>
                                                         <td>{p.gender}</td>
 
-                                                        {/* <td>
-                                                            <span className={`approved ${p.status === "approved" ? "approved-active" : "approved-reject"}`}>
+                                                        <td>
+                                                            <span className={`approved text-capitalize ${statusClass(p?.status)}`}>
                                                                 {p.status}
                                                             </span>
-                                                        </td> */}
+                                                        </td>
 
                                                         <td>
                                                             <div className="dropdown position-static">
@@ -166,9 +188,13 @@ function Patients() {
                                                                             View Details
                                                                         </NavLink>
                                                                     </li>
-                                                                    {/* <li className="prescription-item">
-                                                                        <a className="prescription-nav">Inactive</a>
-                                                                    </li> */}
+                                                                    {p?.status=="approved"?
+                                                                    <li className="prescription-item">
+                                                                        <a onClick={()=>toggleStatus(p?._id,"pending")} className="prescription-nav">Inactive</a>
+                                                                    </li>:
+                                                                    <li className="prescription-item">
+                                                                        <a onClick={()=>toggleStatus(p?._id,"approved")} className="prescription-nav">Active</a>
+                                                                    </li>}
                                                                     {/* <li className="prescription-item">
                                                                         <a className="prescription-nav">Delete</a>
                                                                     </li> */}
@@ -178,7 +204,7 @@ function Patients() {
                                                     </tr>
                                                 ))
                                             )}
-                                            
+
                                         </tbody>
                                     </table>
                                 </div>

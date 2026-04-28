@@ -171,6 +171,7 @@ function LeftSidebar() {
                <Sub to="/landing/patient-speciality"   label="Doctor Category" />
               <Sub to="/landing/patient-services"   label="Services" />
               <Sub to="/landing/patient-test-category"   label="Test Category" />
+              <Sub to="/landing/sub-test-category"   label="Sub Test Category" />
               <Sub to="/landing/patient-hospital-category"   label="Hospital Category" />
               <Sub to="/landing/patient-pharmacy-category"   label="Pharmacy Category" />
               <Sub to="/landing/patient-how-it-work"   label="How It Works" />

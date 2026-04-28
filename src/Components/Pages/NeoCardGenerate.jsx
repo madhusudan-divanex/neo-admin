@@ -166,18 +166,18 @@ function NeoCardGenerate() {
               </div>
 
               {/* ── Right Card Preview (ORIGINAL DESIGN) ── */}
-              {cardReady && <div className="col-lg-5">
+              {!cardReady && <div className="col-lg-5">
                 <div className="d-flex align-items-center justify-content-center gap-2">
 
                   {/* Original card — just replace static text with dynamic */}
                   <div ref={cardRef} className="add-patients-clients">
                     <div className="chip-card"></div>
                     <img src={userData?.role == "patient" ?
-                      "/nw-card.png" : userData?.role == "hospital" ?
-                        "/hospital-card.png" : userData?.role == "lab" ?
-                          "/lab-card.png" : userData?.role == "pharmacy" ?
-                            "/pharmacy-card.png" :
-                            "/card-pic.png"} alt="" />
+                      "/PatientNeoCard.png" : userData?.role == "hospital" ?
+                        "/HospitalNeoCard.png" : userData?.role == "lab" ?
+                          "/LaboratoryNeoCard.png" : userData?.role == "pharmacy" ?
+                            "/PharmacyNeoCard.png" :
+                            "/PatientNeoCard.png"} alt="" />
                     <div className="patient-card-details">
                       <h4>{name?.length>20 ? name.slice(0,17)+'...' : name}</h4>
                       <p>Patient ID</p>

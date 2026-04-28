@@ -15,7 +15,7 @@ import toast from "react-hot-toast";
 import api from "../../utils/axios";
 import { formatDate } from "../../utils/date";
 import base_url from "../../Services/baseUrl";
-import { calculateAge } from "../../Services/globalFunction";
+import { calculateAge, statusClass } from "../../Services/globalFunction";
 
 
 function DoctorsList() {
@@ -218,10 +218,7 @@ function DoctorsList() {
                       {/* ===== STATUS TOGGLE ===== */}
                       <td>
                         <span
-                          className={`approved ${d.status === "approved"
-                            ? "approved-active"
-                            : "approved-reject"
-                            }`}
+                          className={`approved ${statusClass(d.status)}`}
                           style={{ cursor: "pointer" }}
                           onClick={() => toggleStatus(d._id)}
                         >

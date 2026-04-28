@@ -6,19 +6,28 @@ import api from "../../utils/axios"
 import Loader from "../Common/Loader"
 import base_url from "../../utils/config"
 import html2pdf from "html2pdf.js"
+import { getSecureApiData } from "../../Services/api"
 
 function DoctorAppointmentDetailsCancel() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [data, setData] = useState(null)
+  const [patientData,setPatientData]=useState()
+  const [doctorData,setDoctorData]=useState()
   const [loading, setLoading] = useState(true)
   const printRef = useRef()
 
+  console.log(id)
   useEffect(() => {
     (async () => {
       try {
-        const res = await api.get(`/api/admin/doctor/appointment/${id}`)
-        if (res.data.success) setData(res.data.data)
+        const res = await getSecureApiData(`api/admin/doctor/appointment/${id}`)
+        if(res.success){
+          setData(res.appointmentData)
+          setDoctorData(res.doctor)
+          setPatientData(res.patient)
+        }
+      
       } catch {} finally { setLoading(false) }
     })()
   }, [id])

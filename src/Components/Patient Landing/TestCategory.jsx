@@ -5,18 +5,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { deleteApiData, getApiData, securePostData, updateApiData } from "../../Services/api";
 import base_url from "../../Services/baseUrl";
-
+import Select from "react-select"
 function TestCategory() {
     const [view, setView] = useState("table");
     const [saving, setSaving] = useState(false);
     const [workData, setWorkData] = useState([])
     const [editingId, setEditingId] = useState()
-
+    const [subCatData, setSubCatData] = useState([])
     const [form, setForm] = useState({
         icon: null,
         preview: "",
         name: "",
-        start: "",
+        start: "", subCat: []
 
     });
 
@@ -43,6 +43,7 @@ function TestCategory() {
             const formData = new FormData();
 
             formData.append("name", form.name);
+            formData.append("subCat",JSON.stringify(form.subCat));
 
             if (form.icon instanceof File) {
                 formData.append("icon", form.icon);
@@ -53,12 +54,16 @@ function TestCategory() {
                 formData.append("spId", editingId);
             }
 
-            const res =editingId?await updateApiData('admin/test-category',formData) : await securePostData(
+            const res = editingId ? await updateApiData('admin/test-category', formData) : await securePostData(
                 "admin/test-category",
                 formData
             );
+            if (res.success) {
 
-            toast.success(res.message);
+                toast.success(res.message);
+            } else {
+                toast.error(res.message)
+            }
 
             setView("table");
             fetchData();
@@ -74,16 +79,25 @@ function TestCategory() {
     // ✅ get data
     const fetchData = async () => {
         try {
-            const res = await getApiData("api/admin/landing/patient");
+            const [res, result] = await Promise.all([
+                getApiData("api/admin/landing/patient"),
+                getApiData("admin/sub-test-category?limit=1000")
+            ]);
 
             const data = res.data?.testCat;
-            setWorkData(data)
-            if (!data) return;
+            setWorkData(data);
 
-
+            if (result.success) {
+                const options = result?.data?.map(item => ({
+                    label: item?.name,
+                    value: item?._id
+                }))
+                setSubCatData(options);
+            }
 
         } catch (err) {
             console.log(err);
+            toast.error(err?.message);
         }
     };
 
@@ -96,6 +110,7 @@ function TestCategory() {
             icon: null,
             preview: "",
             name: "",
+            subCat: []
         });
         setView("form");
     }; const handleEdit = (item) => {
@@ -105,18 +120,19 @@ function TestCategory() {
             icon: item.icon,
             preview: `${base_url}/${item.icon}`,
             name: item.name,
+            subCat: item?.subCat
         });
 
         setView("form");
     };
     const handleDelete = async (id) => {
         try {
-            const res=await deleteApiData(`admin/test-category/${id}`);
-            if(res?.success){
+            const res = await deleteApiData(`admin/test-category/${id}`);
+            if (res?.success) {
 
                 toast.success("Deleted");
                 fetchData();
-            }else{
+            } else {
                 toast.error(res?.message)
             }
         } catch {
@@ -150,7 +166,6 @@ function TestCategory() {
                         </div>
 
                     </div>
-                    {console.log(workData)}
                     {workData?.map((item) => (
                         <div className="row mt-3 align-items-center" key={item._id}>
 
@@ -212,6 +227,26 @@ function TestCategory() {
                                     <img src={form.preview} style={{ width: 60, marginTop: 10 }} />
                                 )}
                             </div>
+                            <div className="col-12">
+                                <div className="custom-frm-bx">
+                                    <label>Sub Category</label>
+                                    <Select
+                                        options={subCatData}
+                                        isMulti
+                                        required
+                                        value={subCatData.filter(option =>
+                                            form.subCat?.includes(option.value)
+                                        )}
+                                        className="custom-select"
+                                        placeholder="Select category..."
+                                        onChange={(selectedOptions) => {
+                                            const values = selectedOptions?.map(item => item.value) || [];
+                                            setForm({ ...form, subCat: values });
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
 
                         </div>
 

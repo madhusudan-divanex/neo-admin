@@ -125,7 +125,7 @@ function DoctorRequest() {
                       : list.map((item, i) => (
                         <tr key={item._id}>
                           <td>{String((page - 1) * limit + i + 1).padStart(2, "0")}.</td>
-                          <td><img src={item.profileImage ? `${IMAGE_BASE_URL}/uploads/doctor/${item.profileImage}` : "/doctor-avatr.png"} alt=""
+                          <td><img src={item.profileImage ? `${IMAGE_BASE_URL}/${item.profileImage}` : "/doctor-avatr.png"} alt=""
                             style={{ width: 44, height: 44, borderRadius: "50%", objectFit: "cover" }}
                             onError={e => { e.target.src = "/doctor-avatr.png"; }} /></td>
                           <td><h6 className="mb-0">{item.name}</h6></td>

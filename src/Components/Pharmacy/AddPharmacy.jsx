@@ -102,7 +102,12 @@ function AddPharmacy() {
 
     useEffect(() => {
         getApiData("api/location/countries")
-            .then(res => setCountries(res))
+            .then(res => {
+                const data = res.find(item => item?.name == "India")
+                setForm({ ...form, countryId: data?._id })
+                fetchStates(data?.isoCode)
+                setCountries(res)
+            })
             .catch(err => console.error(err));
 
     }, []);

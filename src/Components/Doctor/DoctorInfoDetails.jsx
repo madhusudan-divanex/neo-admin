@@ -37,7 +37,7 @@ function DoctorInfoDetails() {
   const initCard = () => {
     if (!cardName) {
       setCardName(doctor?.name || "");
-      setCardId(doctor?.user?.unique_id || doctor?.about?.customId || "");
+      setCardId(doctor?.nh12 || doctor?.user?.nh12 || "");
     }
   };
 
@@ -658,7 +658,7 @@ function DoctorInfoDetails() {
                                                         <div className="patient-card-details">
                                                             <h4>{cardReady ? cardName.toUpperCase() : (doctor?.name?.toUpperCase() || "DOCTOR NAME")}</h4>
                                                             <p>Doctor ID</p>
-                                                            <h6>{cardReady ? cardId : (doctor?.user?.unique_id || "NHCXXXXXXXX")}</h6>
+                                                            <h6>{cardReady ? cardId : (doctor?.user?.nh12 || "NHCXXXXXXXX")}</h6>
                                                         </div>
                                                         <div className="qr-code-generate">
                                                           {cardReady && (
