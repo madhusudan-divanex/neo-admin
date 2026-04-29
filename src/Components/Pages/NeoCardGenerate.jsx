@@ -35,13 +35,13 @@ function NeoCardGenerate() {
 
 
 
-  const handleGenerate = async() => {
+  const handleGenerate = async () => {
     if (!name || !userId) return;
     try {
-      const res=await securePostData('admin/generate-card',{userId:userData?._id})
-      if(res.success){
+      const res = await securePostData('admin/generate-card', { userId: userData?._id })
+      if (res.success) {
         setCardReady(true);
-      }else{
+      } else {
         toast.error(res.message)
       }
     } catch (error) {
@@ -166,21 +166,21 @@ function NeoCardGenerate() {
               </div>
 
               {/* ── Right Card Preview (ORIGINAL DESIGN) ── */}
-              {!cardReady && <div className="col-lg-5">
+              {cardReady && <div className="col-lg-5">
                 <div className="d-flex align-items-center justify-content-center gap-2">
 
                   {/* Original card — just replace static text with dynamic */}
                   <div ref={cardRef} className="add-patients-clients">
-                    <div className="chip-card"></div>
-                    <img src={userData?.role == "patient" ?
-                      "/PatientNeoCard.png" : userData?.role == "hospital" ?
-                        "/HospitalNeoCard.png" : userData?.role == "lab" ?
-                          "/LaboratoryNeoCard.png" : userData?.role == "pharmacy" ?
-                            "/PharmacyNeoCard.png" :
-                            "/PatientNeoCard.png"} alt="" />
+                    <div className={userData?.role == "patient" ?
+                      "patient-chip-card" : userData?.role == "hospital" ?
+                        "hospital-chip-card" : userData?.role == "lab" ?
+                          "lab-chip-card" : userData?.role == "pharmacy" ?
+                            "phar-chip-card" :
+                            "doctor-chip-card"}></div>
+                    <img src={"/NeoCard.png"} alt="" />
                     <div className="patient-card-details">
-                      <h4>{name?.length>20 ? name.slice(0,17)+'...' : name}</h4>
-                      <p>Patient ID</p>
+                      <h4>{name?.length > 17 ? name.slice(0, 14) + '...' : name}</h4>
+                      {/* <p>Patient ID</p> */}
                       <h6>{cardReady ? userId : "PATIENT20240423"}</h6>
                     </div>
                     <div className="qr-code-generate">
@@ -189,8 +189,8 @@ function NeoCardGenerate() {
                           value={userData?.nh12}
                           size={256}
                           style={{ height: "auto", maxWidth: "100%", width: "20%" }}
-                        // bgColor="transparent"
-                        // fgColor="#ffffff"
+                          bgColor="transparent"
+                          fgColor="#ffffff"
                         />
                       )}
                     </div>

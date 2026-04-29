@@ -194,7 +194,7 @@ function Router() {
             { path: "landing/patient-speciality", element: <PtSpeciality /> },
             { path: "landing/patient-testimonial", element: <TestimonialPage /> },
             { path: "landing/patient-test-category", element: <TestCategory /> },
-            { path: "landing/sub-test-category", element: <SubTestCategory /> },
+            { path: "landing/sub-test-category/:id", element: <SubTestCategory /> },
             { path: "landing/patient-hospital-category", element: <HospitalCategory /> },
             { path: "landing/patient-pharmacy-category", element: <PharmacyCategory /> },
             { path: "landing/patient-how-it-work", element: <HowItWorkPage /> },

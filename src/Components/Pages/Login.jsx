@@ -34,8 +34,8 @@ function Login() {
       // 🔐 SAVE TOKEN
       localStorage.setItem("admin_token", res.data.token);
       localStorage.setItem("admin_user", JSON.stringify(res.data.admin));
-      initFCM(); 
-        toast.success("Login successful");
+      initFCM();
+      toast.success("Login successful");
       navigate("/dashboard");
     } catch (err) {
       toast.error(err.response?.data?.message || "Invalid credentials");

@@ -3598,7 +3598,7 @@ min-height: 100vh; */
     height: 200px;
 }
 
-.chip-card {
+/* .chip-card {
     position: absolute;
     top: 30px;
     left: 20px;
@@ -3607,7 +3607,58 @@ min-height: 100vh; */
     background-size: contain;
     width: 50px;
     height: 50px;
+} */
+.patient-chip-card {
+    position: absolute;
+    top: 30px;
+    left: 20px;
+    background-image: url(/patientCardLogo.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 50px;
+    height: 50px;
 }
+.lab-chip-card {
+    position: absolute;
+    top: 30px;
+    left: 20px;
+    background-image: url(/labCardLogo.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 50px;
+    height: 50px;
+}
+.phar-chip-card {
+    position: absolute;
+    top: 30px;
+    left: 20px;
+    background-image: url(/pharCardLogo.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 50px;
+    height: 50px;
+}
+.hospital-chip-card {
+    position: absolute;
+    top: 30px;
+    left: 20px;
+    background-image: url(/hospitalCardLogo.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 50px;
+    height: 50px;
+}
+.doctor-chip-card {
+    position: absolute;
+    top: 30px;
+    left: 20px;
+    background-image: url(/doctorCardLogo.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 50px;
+    height: 50px;
+}
+
 
 .patient-card-details {
     position: absolute;

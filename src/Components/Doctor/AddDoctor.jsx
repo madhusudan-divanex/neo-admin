@@ -196,7 +196,7 @@ function AddDoctor() {
                             {/* <div className="col-lg-6 col-md-6 col-sm-12">
                                                 <div className="custom-frm-bx">
                                                     <label htmlFor="">Doctor ID</label>
-                                                    <input type="text" className="form-control new-control-frm" placeholder="Enter Doctor ID" />
+                                                    <input type="text" className="form-control nw-select-frm" placeholder="Enter Doctor ID" />
 
                                                 </div>
                                             </div> */}
@@ -206,7 +206,7 @@ function AddDoctor() {
                                     <label htmlFor="">Doctor Name </label>
                                     <input type="text" name="name"
                                         value={form.name}
-                                        onChange={handleChange} className="form-control new-control-frm" placeholder="Enter Doctor Name " />
+                                        onChange={handleChange} className="form-control nw-select-frm" placeholder="Enter Doctor Name " />
                                     {errors.name && <small className="text-danger">{errors.name}</small>}
 
                                 </div>
@@ -218,7 +218,7 @@ function AddDoctor() {
                                     <input type="date" name="dob"
                                         value={form.dob}
                                         max={new Date().toISOString().split("T")[0]}
-                                        onChange={handleChange} className="form-control new-control-frm" placeholder="Enter " />
+                                        onChange={handleChange} className="form-control nw-select-frm" placeholder="Enter " />
                                     {errors.dob && <small className="text-danger">{errors.dob}</small>}
                                 </div>
                             </div>
@@ -227,7 +227,7 @@ function AddDoctor() {
                                 <div className="custom-frm-bx">
                                     <label>Gender</label>
                                     <div className="field  mb-0  ">
-                                        <select className="form-select" name="gender"
+                                        <select className="form-control nw-select-frm" name="gender"
                                             value={form.gender}
                                             onChange={handleChange}>
                                             <option value="">Select</option>
@@ -243,7 +243,7 @@ function AddDoctor() {
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="custom-frm-bx">
                                     <label htmlFor="">Mobile Number</label>
-                                    <input type="number" className="form-control new-control-frm" placeholder="Enter  mobile number "
+                                    <input type="number" className="form-control nw-select-frm" placeholder="Enter  mobile number "
                                         name="contactNumber"
                                         value={form.contactNumber}
                                         onChange={handleChange} />
@@ -257,7 +257,7 @@ function AddDoctor() {
                                     <label htmlFor="">Email</label>
                                     <input name="email"
                                         value={form.email}
-                                        onChange={handleChange} type="email" className="form-control new-control-frm" placeholder="Enter  Email " />
+                                        onChange={handleChange} type="email" className="form-control nw-select-frm" placeholder="Enter  Email " />
                                     {errors.email && <small className="text-danger">{errors.email}</small>}
 
                                 </div>
@@ -268,7 +268,7 @@ function AddDoctor() {
                                     <label htmlFor="">Emergency contact person name</label>
                                     <input name="contact.emergencyContactName"
                                         value={form.emergencyContactName}
-                                        onChange={handleChange} type="text" className="form-control new-control-frm" placeholder="Emergency contact person name" />
+                                        onChange={handleChange} type="text" className="form-control nw-select-frm" placeholder="Emergency contact person name" />
                                     {errors.emergencyContactName && <small className="text-danger">{errors.emergencyContactName}</small>}
 
                                 </div>
@@ -279,7 +279,7 @@ function AddDoctor() {
                                     <label htmlFor="">Emergency Contact Phone</label>
                                     <input name="contact.emergencyContactNumber"
                                         value={form?.contact?.emergencyContactNumber}
-                                        onChange={handleChange} type="number" className="form-control new-control-frm" placeholder="Enter  Emergency Contact Phone" />
+                                        onChange={handleChange} type="number" className="form-control nw-select-frm" placeholder="Enter  Emergency Contact Phone" />
                                     {errors.emergencyContactNumber && <small className="text-danger">{errors.emergencyContactNumber}</small>}
 
                                 </div>
@@ -290,7 +290,7 @@ function AddDoctor() {
                                     <label htmlFor="">Address</label>
                                     <textarea name="fullAddress"
                                         value={form.fullAddress}
-                                        onChange={handleChange} id="" className="form-control new-control-frm"></textarea>
+                                        onChange={handleChange} id="" className="form-control nw-select-frm"></textarea>
                                     {errors.fullAddress && <small className="text-danger">{errors.fullAddress}</small>}
 
 
@@ -300,7 +300,7 @@ function AddDoctor() {
                                 <div className="custom-frm-bx">
                                     <label>Country</label>
                                     <div className="fieldmb-0  ">
-                                        <select className="form-select" value={form.countryId}
+                                        <select className="form-control nw-select-frm" value={form.countryId}
                                             name="countryId"
                                             onChange={handleChange}>
                                             <option value="">---Select Country---</option>
@@ -321,7 +321,7 @@ function AddDoctor() {
                                 <div className="custom-frm-bx">
                                     <label>State</label>
                                     <div className="field  mb-0  ">
-                                        <select className="form-select" value={form.stateId}
+                                        <select className="form-control nw-select-frm" value={form.stateId}
                                             name="stateId"
                                             onChange={handleChange}>
                                             <option value={""}>---Select State---</option>
@@ -341,7 +341,7 @@ function AddDoctor() {
                                 <div className="custom-frm-bx">
                                     <label>City</label>
                                     <div className="field mb-0 ">
-                                        <select className="form-select" value={form.cityId}
+                                        <select className="form-control nw-select-frm" value={form.cityId}
                                             name="cityId"
                                             onChange={handleChange}>
                                             <option value={""}>---Select City---</option>
@@ -360,7 +360,7 @@ function AddDoctor() {
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="custom-frm-bx">
                                     <label htmlFor="">Pin code</label>
-                                    <input type="number" name="pinCode" value={form.pinCode} onChange={handleChange} className="form-control new-control-frm" placeholder="Enter Pin code" />
+                                    <input type="number" name="pinCode" value={form.pinCode} onChange={handleChange} className="form-control nw-select-frm" placeholder="Enter Pin code" />
                                     {errors.pinCode && <small className="text-danger">{errors.pinCode}</small>}
 
                                 </div>

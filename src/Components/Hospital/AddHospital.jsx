@@ -217,7 +217,7 @@ function AddHospital() {
                             {/* <div className="col-lg-6 col-md-6 col-sm-12">
                                                 <div className="custom-frm-bx">
                                                     <label htmlFor="">Lab ID</label>
-                                                    <input type="text" className="form-control new-control-frm" placeholder="Enter Lab ID" />
+                                                    <input type="text" className="form-control nw-select-frm" placeholder="Enter Lab ID" />
 
                                                 </div>
                                             </div> */}
@@ -227,7 +227,7 @@ function AddHospital() {
                                     <label htmlFor="">Hospital Name </label>
                                     <input type="text" name="name"
                                         value={form.name}
-                                        onChange={handleChange} className="form-control new-control-frm" placeholder="Enter Hospital Name " />
+                                        onChange={handleChange} className="form-control nw-select-frm" placeholder="Enter Hospital Name " />
                                     {errors.name && <small className="text-danger">{errors.name}</small>}
 
                                 </div>
@@ -238,7 +238,7 @@ function AddHospital() {
                                     <label htmlFor="">GST Number</label>
                                     <input type="text" name="gstNumber"
                                         value={form.gstNumber}
-                                        onChange={handleChange} className="form-control new-control-frm" placeholder="Enter " />
+                                        onChange={handleChange} className="form-control nw-select-frm" placeholder="Enter " />
                                     {errors.gstNumber && <small className="text-danger">{errors.gstNumber}</small>}
                                 </div>
                             </div>
@@ -247,7 +247,7 @@ function AddHospital() {
                                     <label htmlFor="">License Id</label>
                                     <input type="text" name="licenseId"
                                         value={form.licenseId}
-                                        onChange={handleChange} className="form-control new-control-frm" placeholder="Enter " />
+                                        onChange={handleChange} className="form-control nw-select-frm" placeholder="Enter " />
                                     {errors.licenseId && <small className="text-danger">{errors.licenseId}</small>}
                                 </div>
                             </div>
@@ -256,7 +256,7 @@ function AddHospital() {
                                     <label htmlFor="">Established Year</label>
                                     <input type="number" name="establishedYear"
                                         value={form.establishedYear}
-                                        onChange={handleChange} className="form-control new-control-frm" placeholder="Enter " />
+                                        onChange={handleChange} className="form-control nw-select-frm" placeholder="Enter " />
                                     {errors.establishedYear && <small className="text-danger">{errors.establishedYear}</small>}
                                 </div>
                             </div>
@@ -264,7 +264,7 @@ function AddHospital() {
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="custom-frm-bx">
                                     <label>About</label>
-                                    <input type="text" className="form-control new-control-frm" placeholder="Enter about hospital"
+                                    <input type="text" className="form-control nw-select-frm" placeholder="Enter about hospital"
                                         name="about"
                                         value={form.about}
                                         onChange={handleChange} />
@@ -276,7 +276,7 @@ function AddHospital() {
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="custom-frm-bx">
                                     <label htmlFor="">Mobile Number</label>
-                                    <input type="number" className="form-control new-control-frm" placeholder="Enter  mobile number "
+                                    <input type="number" className="form-control nw-select-frm" placeholder="Enter  mobile number "
                                         name="contactNumber"
                                         value={form.contactNumber}
                                         onChange={handleChange} />
@@ -290,7 +290,7 @@ function AddHospital() {
                                     <label htmlFor="">Email</label>
                                     <input name="email"
                                         value={form.email}
-                                        onChange={handleChange} type="email" className="form-control new-control-frm" placeholder="Enter  Email " />
+                                        onChange={handleChange} type="email" className="form-control nw-select-frm" placeholder="Enter  Email " />
                                     {errors.email && <small className="text-danger">{errors.email}</small>}
 
                                 </div>
@@ -301,7 +301,7 @@ function AddHospital() {
                                     <label htmlFor="">Emergency contact person name</label>
                                     <input name="contact.emergencyContactName"
                                         value={form.emergencyContactName}
-                                        onChange={handleChange} type="text" className="form-control new-control-frm" placeholder="Emergency contact person name" />
+                                        onChange={handleChange} type="text" className="form-control nw-select-frm" placeholder="Emergency contact person name" />
                                     {errors.emergencyContactName && <small className="text-danger">{errors.emergencyContactName}</small>}
 
                                 </div>
@@ -312,7 +312,7 @@ function AddHospital() {
                                     <label htmlFor="">Emergency Contact Phone</label>
                                     <input name="contact.emergencyContactNumber"
                                         value={form?.contact?.emergencyContactNumber}
-                                        onChange={handleChange} type="number" className="form-control new-control-frm" placeholder="Enter  Emergency Contact Phone" />
+                                        onChange={handleChange} type="number" className="form-control nw-select-frm" placeholder="Enter  Emergency Contact Phone" />
                                     {errors.emergencyContactNumber && <small className="text-danger">{errors.emergencyContactNumber}</small>}
 
                                 </div>
@@ -340,7 +340,7 @@ function AddHospital() {
                                     <label htmlFor="">Address</label>
                                     <textarea name="fullAddress"
                                         value={form.fullAddress}
-                                        onChange={handleChange} id="" className="form-control new-control-frm"></textarea>
+                                        onChange={handleChange} id="" className="form-control nw-select-frm"></textarea>
                                     {errors.fullAddress && <small className="text-danger">{errors.fullAddress}</small>}
 
 
@@ -350,7 +350,7 @@ function AddHospital() {
                                 <div className="custom-frm-bx">
                                     <label>Country</label>
                                     <div className="fieldmb-0  ">
-                                        <select className="form-select" value={form.country}
+                                        <select className="form-control nw-select-frm" value={form.country}
                                             name="country"
                                             onChange={handleChange}>
                                             <option value="">---Select Country---</option>
@@ -371,7 +371,7 @@ function AddHospital() {
                                 <div className="custom-frm-bx">
                                     <label>State</label>
                                     <div className="field  mb-0  ">
-                                        <select className="form-select" value={form.state}
+                                        <select className="form-control nw-select-frm" value={form.state}
                                             name="state"
                                             onChange={handleChange}>
                                             <option value={""}>---Select State---</option>
@@ -391,7 +391,7 @@ function AddHospital() {
                                 <div className="custom-frm-bx">
                                     <label>City</label>
                                     <div className="field mb-0 ">
-                                        <select className="form-select" value={form.city}
+                                        <select className="form-control nw-select-frm" value={form.city}
                                             name="city"
                                             onChange={handleChange}>
                                             <option value={""}>---Select City---</option>
@@ -410,7 +410,7 @@ function AddHospital() {
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="custom-frm-bx">
                                     <label htmlFor="">Pin code</label>
-                                    <input type="number" name="pinCode" value={form.pinCode} onChange={handleChange} className="form-control new-control-frm" placeholder="Enter Pin code" />
+                                    <input type="number" name="pinCode" value={form.pinCode} onChange={handleChange} className="form-control nw-select-frm" placeholder="Enter Pin code" />
                                     {errors.pinCode && <small className="text-danger">{errors.pinCode}</small>}
 
                                 </div>

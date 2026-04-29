@@ -6,12 +6,13 @@ import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { deleteApiData, getApiData, securePostData, updateApiData } from "../../Services/api";
 import base_url from "../../Services/baseUrl";
 import Select from "react-select"
+import { Link } from "react-router-dom";
 function TestCategory() {
     const [view, setView] = useState("table");
     const [saving, setSaving] = useState(false);
     const [workData, setWorkData] = useState([])
     const [editingId, setEditingId] = useState()
-    const [subCatData, setSubCatData] = useState([])
+    // const [subCatData, setSubCatData] = useState([])
     const [form, setForm] = useState({
         icon: null,
         preview: "",
@@ -43,7 +44,7 @@ function TestCategory() {
             const formData = new FormData();
 
             formData.append("name", form.name);
-            formData.append("subCat",JSON.stringify(form.subCat));
+            // formData.append("subCat",JSON.stringify(form.subCat));
 
             if (form.icon instanceof File) {
                 formData.append("icon", form.icon);
@@ -79,21 +80,14 @@ function TestCategory() {
     // ✅ get data
     const fetchData = async () => {
         try {
-            const [res, result] = await Promise.all([
-                getApiData("api/admin/landing/patient"),
-                getApiData("admin/sub-test-category?limit=1000")
+            const [res] = await Promise.all([
+                getApiData("api/admin/landing/patient")
             ]);
 
             const data = res.data?.testCat;
             setWorkData(data);
 
-            if (result.success) {
-                const options = result?.data?.map(item => ({
-                    label: item?.name,
-                    value: item?._id
-                }))
-                setSubCatData(options);
-            }
+
 
         } catch (err) {
             console.log(err);
@@ -152,44 +146,57 @@ function TestCategory() {
                 )}
             </div>
             {view === "table" && (
-                <div className="new-mega-card p-4">
-                    <div className="row mt-3 align-items-center" >
+                <div className="row">
+                    <div className="col-lg-12">
+                        <div className="table-section admin-mega-section">
+                            <div className="table table-responsive mb-0">
+                                <table className="table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Image</th>
+                                            <th>Name</th>
+                                            <th>Sub Category</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
 
-                        <div className="col-lg-2">
-                            Image
-                        </div>
+                                    <tbody>
 
-                        <div className="col-lg-2">Name</div>
+                                        {workData?.map((item,key) => (
+                                            <tr>
+                                                <td>{key+1}</td>
 
-                        <div className="col-lg-2">
-                            Action
-                        </div>
+                                                <td>
+                                                    <img
+                                                        src={`${base_url}/${item.icon}`}
+                                                        style={{ width: 60, borderRadius: 6 }}
+                                                    />
+                                                </td>
 
-                    </div>
-                    {workData?.map((item) => (
-                        <div className="row mt-3 align-items-center" key={item._id}>
+                                                <td>{item.name}</td>
+                                                <td>
+                                                    <Link to={`/landing/sub-test-category/${item?._id}`} className="thm-btn">View</Link>
+                                                </td>
 
-                            <div className="col-lg-2">
-                                <img
-                                    src={`${base_url}/${item.icon}`}
-                                    style={{ width: 60, borderRadius: 6 }}
-                                />
-                            </div>
+                                                <td>
+                                                    <button className="btn btn-sm btn-outline-success me-2" onClick={() => handleEdit(item)}>
+                                                        <FontAwesomeIcon icon={faEdit} />
+                                                    </button>
 
-                            <div className="col-lg-2">{item.name}</div>
-
-                            <div className="col-lg-2">
-                                <button className="btn btn-sm btn-outline-success me-2" onClick={() => handleEdit(item)}>
-                                    <FontAwesomeIcon icon={faEdit} />
-                                </button>
-
-                                {/* <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(item._id)}>
+                                                    {/* <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(item._id)}>
                                     <FontAwesomeIcon icon={faTrash} />
                                 </button> */}
-                            </div>
+                                                </td>
 
-                        </div>
-                    ))}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+
+                                </table>
+                            </div></div>
+                    </div>
+
 
                 </div>
             )}
@@ -227,7 +234,7 @@ function TestCategory() {
                                     <img src={form.preview} style={{ width: 60, marginTop: 10 }} />
                                 )}
                             </div>
-                            <div className="col-12">
+                            {/* <div className="col-12">
                                 <div className="custom-frm-bx">
                                     <label>Sub Category</label>
                                     <Select
@@ -245,7 +252,7 @@ function TestCategory() {
                                         }}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
 
                         </div>

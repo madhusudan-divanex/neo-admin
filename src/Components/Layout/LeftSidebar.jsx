@@ -119,6 +119,12 @@ function LeftSidebar() {
               <Sub to="/notification"   label="Notifications" />
             </SubMenu>
             <MenuItem to="/schedule-medicines" icon={<FontAwesomeIcon icon={faBorderAll} />} label="Schedule medicines" />
+            <MenuItem to="/landing/patient-test-category" icon={<FontAwesomeIcon icon={faBorderAll} />} label="Test Category" />
+
+            {/* <SubMenu id="catSubmenu" icon={<FontAwesomeIcon icon={faFile} />} label="Test Categories">
+              <Sub to="/landing/patient-test-category"   label="Test Category" />
+              <Sub to="/landing/sub-test-category"   label="Sub Test Category" />
+            </SubMenu> */}
             
             {/* Pages / Content */}
             <SubMenu id="cmsMgmtSubmenu" icon={<FontAwesomeIcon icon={faNoteSticky} />} label="CMS Pages">
@@ -170,8 +176,7 @@ function LeftSidebar() {
               <Sub to="/landing/first-patient"   label="Basic Information" />
                <Sub to="/landing/patient-speciality"   label="Doctor Category" />
               <Sub to="/landing/patient-services"   label="Services" />
-              <Sub to="/landing/patient-test-category"   label="Test Category" />
-              <Sub to="/landing/sub-test-category"   label="Sub Test Category" />
+              
               <Sub to="/landing/patient-hospital-category"   label="Hospital Category" />
               <Sub to="/landing/patient-pharmacy-category"   label="Pharmacy Category" />
               <Sub to="/landing/patient-how-it-work"   label="How It Works" />

@@ -206,8 +206,8 @@ function DoctorsList() {
 
                       <td>
                         <ul className="ad-info-list">
-                          <li>Mobile No : {d.contactNumber || "-"}</li>
-                          <li>Email : {d.email}</li>
+                          <li>Mobile No : {d?.contactNumber || "-"}</li>
+                          <li>Email : {d?.email}</li>
                         </ul>
                       </td>
 
