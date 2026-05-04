@@ -75,8 +75,8 @@ function SubTestCategory() {
     };
 
     useEffect(() => {
-        if(id){
-            setTestData({...testData,category:id})
+        if (id) {
+            setTestData({ ...testData, category: id })
             fetchData();
         }
     }, [id]);
@@ -93,7 +93,7 @@ function SubTestCategory() {
         setEditingId(item._id);
 
         setTestData({
-            ...testData, ...item, specialApproval: item.specialApproval, category: item.category?._id,
+            ...testData, ...item, specialApproval: item.specialApproval, category: item.category,
             subCategory: item.subCategory
         })
         const data = item.component
@@ -127,9 +127,8 @@ function SubTestCategory() {
             unit: "",
             title: '',
             optionType: "text",
-            textResult: '',
-            result: [{ value: '', note: '' }],
-            referenceRange: "",
+            minRange: "",
+            maxRange: "",
             status: false,
         },
     ]);
@@ -153,40 +152,12 @@ function SubTestCategory() {
                 error.optionType = "Select type is required";
             }
 
-            if (comp.optionType === "text") {
-                if (!comp.textResult?.trim()) {
-                    error.textResult = "Text result is required";
-                }
+
+            if (comp.optionType=="text" && !comp.minRange) {
+                error.minRange = "Min range is required";
             }
-
-            if (comp.optionType === "select") {
-                if (!comp.result || comp.result.length === 0) {
-                    error.result = "At least one option required";
-                } else {
-                    let optionErrors = [];
-
-                    comp.result.forEach((opt, optIndex) => {
-                        let optErr = {};
-
-                        if (!opt.value?.trim()) {
-                            optErr.value = "Option value required";
-                        }
-
-                        // ✅ ONLY push if error exists
-                        if (Object.keys(optErr).length > 0) {
-                            optionErrors[optIndex] = optErr;
-                        }
-                    });
-
-                    // ✅ ONLY assign if any real error exists
-                    if (optionErrors.length > 0) {
-                        error.optionErrors = optionErrors;
-                    }
-                }
-            }
-
-            if (!comp.referenceRange?.trim()) {
-                error.referenceRange = "Range is required";
+            if (comp.optionType=="text" && !comp.maxRange) {
+                error.maxRange = "Max range is required";
             }
 
             newErrors[index] = error;
@@ -250,17 +221,12 @@ function SubTestCategory() {
         const { name, value, type, checked } = e.target;
         const updated = [...components];
 
-        // checkbox handling
-        updated[index][name] = type === "checkbox" ? checked : value;
+        // ✅ optionType-0, optionType-1 → optionType pe map karo
+        const fieldName = name.startsWith('optionType') ? 'optionType' : name
 
-        // optionType switch handling
-        if (name === "optionType") {
-            if (value === "text") {
-                updated[index].textResult = "";
-            } else if (value === "select") {
-                updated[index].result = [{ value: "", note: "" }];
-            }
-        }
+        // checkbox handling
+        updated[index][fieldName] = type === "checkbox" ? checked : value;
+
 
         setComponents(updated);
     };
@@ -268,7 +234,7 @@ function SubTestCategory() {
     const addComponent = () => {
         setComponents([
             ...components,
-            { name: "", unit: "", optionType: "text", textResult: "", result: [{ value: '', note: '' }], referenceRange: "", status: false },
+            { name: "", unit: "", optionType: "text", minRange: "", maxRange: "", status: false },
         ]);
     };
 
@@ -284,26 +250,6 @@ function SubTestCategory() {
             [name]: value,
             ...(name === "category" && { subCategory: "" }) // reset subCategory
         }));
-    };
-
-    const handleAddOption = (componentIndex) => {
-        const updated = [...components];
-        updated[componentIndex].result.push({ value: "", note: "" });
-        setComponents(updated);
-    };
-
-
-    const handleOptionChange = (componentIndex, optionIndex, field, value) => {
-        const updated = [...components];
-        updated[componentIndex].result[optionIndex][field] = value;
-        setComponents(updated);
-    };
-
-
-    const handleRemoveOption = (componentIndex, optionIndex) => {
-        const updated = [...components];
-        updated[componentIndex].result.splice(optionIndex, 1);
-        setComponents(updated);
     };
 
     const testSubmit = async (e) => {
@@ -437,11 +383,11 @@ function SubTestCategory() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {subCatData?.length > 0 ? subCatData?.map((item,key) => (
+                                        {subCatData?.length > 0 ? subCatData?.map((item, key) => (
                                             <tr>
 
 
-                                                <td >{key+1}</td>
+                                                <td >{key + 1}</td>
                                                 <td >{item.subCategory}</td>
                                                 <td >{item.shortName}</td>
 
@@ -462,6 +408,9 @@ function SubTestCategory() {
                                 </table>
                             </div>
                         </div>
+                    </div>
+                    <div className="text-end">
+                        <Link to={-1} className="nw-thm-btn outline">Go Back</Link>
                     </div>
 
                 </div>
@@ -689,7 +638,8 @@ function SubTestCategory() {
                                                         <th>Name</th>
                                                         <th>Unit</th>
                                                         <th>Result</th>
-                                                        <th>Reference Range</th>
+                                                        <th>Min Range</th>
+                                                        <th>Max Range</th>
                                                         {/* <th>Status</th> */}
                                                         <th>Action</th>
 
@@ -744,7 +694,7 @@ function SubTestCategory() {
                                                                             <input
                                                                                 className="form-check-input"
                                                                                 type="radio"
-                                                                                name="optionType"
+                                                                                name={`optionType-${index}`}
                                                                                 value="text"
                                                                                 checked={component.optionType == "text"}
                                                                                 onChange={(e) => handleComponentChange(index, e)}
@@ -756,7 +706,7 @@ function SubTestCategory() {
                                                                             <input
                                                                                 className="form-check-input"
                                                                                 type="radio"
-                                                                                name="optionType"
+                                                                                name={`optionType-${index}`}
                                                                                 value="select"
                                                                                 checked={component.optionType == "select"}
                                                                                 onChange={(e) => handleComponentChange(index, e)}
@@ -770,110 +720,40 @@ function SubTestCategory() {
                                                                             </sapn>
                                                                         )}
 
-                                                                        {/* SELECT TYPE */}
-                                                                        {component.optionType === "select" ? (
-                                                                            <div className="report-droping-bx mt-0">
-
-                                                                                <div className="d-flex justify-content-between align-items-center mb-2">
-                                                                                    <h5 className="optin-title">Options</h5>
-                                                                                    <button
-                                                                                        type="button"
-                                                                                        className="option-rep-add-btn"
-                                                                                        onClick={() => handleAddOption(index)}
-                                                                                    >
-                                                                                        <FaPlusCircle />
-                                                                                    </button>
-                                                                                </div>
-
-                                                                                {component.result.map((opt, optIndex) => (
-                                                                                    <div key={optIndex} className="mb-2">
-
-                                                                                        <div className="d-flex align-items-center gap-2">
-
-                                                                                            {/* VALUE */}
-                                                                                            <div className="custom-frm-bx mb-0 flex-grow-1">
-                                                                                                <input
-                                                                                                    type="text"
-                                                                                                    className="form-control nw-select-frm"
-                                                                                                    placeholder="Option"
-                                                                                                    value={opt.value}
-                                                                                                    onChange={(e) =>
-                                                                                                        handleOptionChange(index, optIndex, "value", e.target.value)
-                                                                                                    }
-                                                                                                />
-                                                                                                {componentErrors[index]?.optionErrors?.[optIndex]?.value && (
-                                                                                                    <span className="text-danger">
-                                                                                                        {componentErrors[index].optionErrors[optIndex].value}
-                                                                                                    </span>
-                                                                                                )}
-                                                                                            </div>
-
-                                                                                            {/* NOTE */}
-                                                                                            <div className="custom-frm-bx mb-0 flex-grow-1">
-                                                                                                <input
-                                                                                                    type="text"
-                                                                                                    className="form-control nw-select-frm"
-                                                                                                    placeholder="Note"
-                                                                                                    value={opt.note}
-                                                                                                    onChange={(e) =>
-                                                                                                        handleOptionChange(index, optIndex, "note", e.target.value)
-                                                                                                    }
-                                                                                                />
-                                                                                            </div>
-
-                                                                                            {/* REMOVE */}
-                                                                                            <button
-                                                                                                type="button"
-                                                                                                className="text-black"
-                                                                                                onClick={() => handleRemoveOption(index, optIndex)}
-                                                                                            >
-                                                                                                <FaTrash />
-                                                                                            </button>
-
-                                                                                        </div>
-                                                                                    </div>
-                                                                                ))}
-
-                                                                                {componentErrors[index]?.result && (
-                                                                                    <span className="text-danger">
-                                                                                        {componentErrors[index].result}
-                                                                                    </span>
-                                                                                )}
-
-                                                                            </div>
-                                                                        ) : (
-                                                                            <div className="custom-frm-bx mb-0 flex-grow-1">
-                                                                                <textarea
-                                                                                    rows={5}
-                                                                                    name="textResult"
-                                                                                    value={component.textResult}
-                                                                                    onChange={(e) => handleComponentChange(index, e)}
-                                                                                    className="form-control nw-select-frm"
-                                                                                />
-                                                                                {componentErrors[index]?.textResult && (
-                                                                                    <span className="text-danger">
-                                                                                        {componentErrors[index].textResult}
-                                                                                    </span>
-                                                                                )}
-                                                                            </div>
-                                                                        )}
 
                                                                     </div>
                                                                 </td>
 
                                                                 <td>
                                                                     <div className="custom-frm-bx">
-                                                                        <textarea
-                                                                            name="referenceRange"
+                                                                        <input
+                                                                            type="number"
+                                                                            name="minRange"
                                                                             className="form-control nw-select-frm"
-                                                                            style={{ resize: "auto", height: "100px" }}
-                                                                            value={component.referenceRange}
+                                                                            value={component.minRange}
                                                                             onChange={(e) => handleComponentChange(index, e)}
-                                                                            placeholder="20-100"
+                                                                            placeholder="Min"
                                                                         />
-                                                                        {componentErrors[index]?.referenceRange && (
+                                                                        {componentErrors[index]?.minRange && (
                                                                             <span className="text-danger">
-                                                                                {componentErrors[index].referenceRange}
+                                                                                {componentErrors[index].minRange}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div className="custom-frm-bx">
+                                                                        <input
+                                                                            type="number"
+                                                                            name="maxRange"
+                                                                            className="form-control nw-select-frm"
+                                                                            value={component.maxRange}
+                                                                            onChange={(e) => handleComponentChange(index, e)}
+                                                                            placeholder="Max"
+                                                                        />
+                                                                        {componentErrors[index]?.maxRange && (
+                                                                            <span className="text-danger">
+                                                                                {componentErrors[index].maxRange}
                                                                             </span>
                                                                         )}
                                                                     </div>
@@ -904,7 +784,7 @@ function SubTestCategory() {
                                                             </tr>
 
                                                             <tr>
-                                                                <td colSpan={6} className="h-auto">
+                                                                <td colSpan={7} className="h-auto">
                                                                     <div className="custom-frm-bx mb-0">
                                                                         <input
                                                                             type="text"
@@ -939,6 +819,7 @@ function SubTestCategory() {
                     </div>
                 </form>
             )}
+
         </div>
     );
 }

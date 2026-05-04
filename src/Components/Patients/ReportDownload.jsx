@@ -233,7 +233,7 @@ function ReportDownload({ appointmentId, currentTest, endLoading, pdfLoading }) 
                                             <tr key={testData._id + index}>
                                                 <td>{testData.shortName} - {cmp.name}</td>
                                                 <td>{cmp.unit || "-"}</td>
-                                                <td>{cmp.referenceRange || "-"}</td>
+                                                <td>{cmp.minRange && cmp.maxRange ? `${cmp.minRange} - ${cmp.maxRange}` : "-"}</td>
                                                 <td>{resultObj.result || "-"}</td>
                                                 <td className="text-capitalize">{resultObj.status || "-"}</td>
                                             </tr>
