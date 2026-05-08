@@ -41,19 +41,19 @@ function PatientsPersonalInfo() {
   const [prescriptions, setPrescriptions] = useState([])
   const [doctorAppointments, setDoctorAppointments] = useState([]);
   const [allotments, setAllotments] = useState([]);
-  const [testReports,setTestReports]=useState([])
+  const [testReports, setTestReports] = useState([])
   const [patientUser, setPatientUser] = useState()
-
-  const [cDocAp, setCDocAp] = useState()
+  const [activeTab, setActiveTab] = useState()
+  const [cDocAp, setCDocAp] = useState(1)
   const [tDocPage, setTDocPage] = useState()
-
-  const [cLabAp, setCLabAp] = useState()
+  const [cardData, setCardData] = useState({ name: '', isReady: false })
+  const [cLabAp, setCLabAp] = useState(1)
   const [tLabPage, setTLabPage] = useState()
 
-  const [cPresAp, setCPresAp] = useState()
+  const [cPresAp, setCPresAp] = useState(1)
   const [tPresPage, setTPresPage] = useState()
 
-  const [cReport, setCReport] = useState()
+  const [cReport, setCReport] = useState(1)
   const [tReportPage, setTReportPage] = useState()
   // ── Single admin API call — loads everything ──────────────────────────
   useEffect(() => {
@@ -66,6 +66,7 @@ function PatientsPersonalInfo() {
     try {
       const res = await api.get(`/api/admin/patients/detail/${params.id}`);
       if (res.data.success) {
+        setCardData({...cardData,name:res?.data?.patient?.name})
         setPatientData(res.data.patient);
         setDemographic(res.data.demographic);
         setMedicalHisotry(res.data.medicalHistory);
@@ -84,15 +85,15 @@ function PatientsPersonalInfo() {
 
   // Load doctor appointments for this patient
   useEffect(() => {
-    if (!params.id) return;
-    loadAppointments();
-  }, [params.id]);
+    if (params.id && activeTab == "doctorAp") {
+
+      loadAppointments();
+    };
+  }, [params.id, activeTab, cDocAp]);
 
   const loadAppointments = async (page = cDocAp) => {
     try {
-      const res = await getSecureApiData(`api/admin/patients/doctor-appointments/${params.id}`, {
-        params: { page }
-      });
+      const res = await getSecureApiData(`api/admin/patients/doctor-appointments/${params.id}?page=${page}&limit=5`);
       if (res.success) {
         setPastAppointments(res.data);
         setTDocPage(res.totalPages)
@@ -102,9 +103,7 @@ function PatientsPersonalInfo() {
   };
   const loadPrescriptions = async (page = cPresAp) => {
     try {
-      const res = await getSecureApiData(`api/admin/patients/doctor-prescription/${params.id}`, {
-        params: { page }
-      });
+      const res = await getSecureApiData(`api/admin/patients/doctor-prescription/${params.id}?page=${page}&limit=10`);
       if (res.success) {
         setPrescriptions(res.data);
         setTPresPage(res.totalPages)
@@ -112,14 +111,12 @@ function PatientsPersonalInfo() {
       }
     } catch { }
   };
-  const loadReports = async (page = cLabAp) => {
+  const loadReports = async (page = cReport) => {
     try {
-      const res = await getSecureApiData(`api/admin/patients/${params.id}/lab-reports`, {
-        params: { page }
-      });
+      const res = await getSecureApiData(`api/admin/patients/${params.id}/lab-reports?page=${page}&limit=2`);
       if (res.success) {
         setLabReports(res.data);
-        setTLabPage(res.totalPages)
+        setTReportPage(res.totalPages)
         // setAppointmentData(mine[0]);
       }
     } catch { }
@@ -127,17 +124,25 @@ function PatientsPersonalInfo() {
 
   // Load lab appointments
   useEffect(() => {
-    if (!params.id) return;
-    loadLabAppointments();
-    loadPrescriptions()
-    loadReports()
-  }, [params.id]);
+    if (params.id && activeTab == "labReport") {
+
+      loadReports()
+    };
+  }, [params.id, cReport, activeTab]);
+  useEffect(() => {
+    if (params.id && activeTab == "labAp") {
+      loadLabAppointments()
+    }
+  }, [params.id, cLabAp, activeTab])
+  useEffect(() => {
+    if (params.id && activeTab == "prescriptions") {
+      loadPrescriptions()
+    }
+  }, [params.id, cPresAp, activeTab])
 
   const loadLabAppointments = async (page = cLabAp) => {
     try {
-      const res = await getSecureApiData(`api/admin/patients/lab-appointments/${params.id}`, {
-        params: { page }
-      });
+      const res = await getSecureApiData(`api/admin/patients/lab-appointments/${params.id}?page=${page}&limit=2`);
       if (res.success) {
         setLabAppointments(res.data);
         setTLabPage(res.totalPages)
@@ -147,17 +152,17 @@ function PatientsPersonalInfo() {
   };
 
   // Load allotments
-  useEffect(() => {
-    if (!params.id) return;
-    (async () => {
-      try {
-        const res = await api.get(`/api/admin/patients/${params.id}/allotments`);
-        if (res.data.success) setAllotments(res.data.data || []);
-      } catch { }
-    })();
-  }, [params.id]);
+  // useEffect(() => {
+  //   if (!params.id) return;
+  //   (async () => {
+  //     try {
+  //       const res = await api.get(`/api/admin/patients/${params.id}/allotments`);
+  //       if (res.data.success) setAllotments(res.data.data || []);
+  //     } catch { }
+  //   })();
+  // }, [params.id]);
 
-  
+
 
   // handleReportDownload
   const handleReportDownload = async (appointmentId, testId, reportId) => {
@@ -235,7 +240,17 @@ function PatientsPersonalInfo() {
       toast.info("Download initiated");
     } catch { } finally { setPdfLoading(null); }
   };
-
+  const cardRef = useRef(null);
+  const handleCardDownload = async () => {
+    if (!cardRef.current) return;
+    try {
+      const canvas = await html2canvas(cardRef.current, { scale: 2, useCORS: true });
+      const link = document.createElement("a");
+      link.download = `NeoCard_${patientUser?.nh12}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (err) { console.error("Download failed", err); }
+  };
   return (
     <>
       {loading ? <Loader />
@@ -272,177 +287,182 @@ function PatientsPersonalInfo() {
             </div>
           </div>
 
-            <div className="row">
-              <div className="col-12">
-                <div className="view-employee-bx">
-                  <div className="employee-tabs">
-                    <ul className="nav nav-tabs gap-3 ps-2" id="myTab" role="tablist">
-                      <li className="nav-item" role="presentation">
-                        <a
-                          className="nav-link active"
-                          id="personal-tab"
-                          data-bs-toggle="tab"
-                          href="#personal"
-                          role="tab"
-                        >
-                          Personal Info
-                        </a>
-                      </li>
-                      <li className="nav-item" role="presentation">
-                        <a
-                          className="nav-link"
-                          id="appointment-tab"
-                          data-bs-toggle="tab"
-                          href="#appointment"
-                          role="tab"
-                        >
-                          Doctor Appointments
-                        </a>
-                      </li>
-                      <li className="nav-item" role="presentation">
-                        <a
-                          className="nav-link"
-                          id="lab-appointment-tab"
-                          data-bs-toggle="tab"
-                          href="#lab-appointment"
-                          role="tab"
-                        >
-                          Lab Appointments
-                        </a>
-                      </li>
+          <div className="row">
+            <div className="col-12">
+              <div className="view-employee-bx">
+                <div className="employee-tabs">
+                  <ul className="nav nav-tabs gap-3 ps-2" id="myTab" role="tablist">
+                    <li className="nav-item" role="presentation">
+                      <a
+                        className="nav-link active"
+                        id="personal-tab"
+                        data-bs-toggle="tab"
+                        onClick={() => setActiveTab()}
+                        href="#personal"
+                        role="tab"
+                      >
+                        Personal Info
+                      </a>
+                    </li>
+                    <li className="nav-item" role="presentation">
+                      <a
+                        className="nav-link"
+                        id="appointment-tab"
+                        data-bs-toggle="tab"
+                        href="#appointment"
+                        onClick={() => setActiveTab('doctorAp')}
+                        role="tab"
+                      >
+                        Doctor Appointments
+                      </a>
+                    </li>
+                    <li className="nav-item" role="presentation">
+                      <a
+                        className="nav-link"
+                        id="lab-appointment-tab"
+                        data-bs-toggle="tab"
+                        onClick={() => setActiveTab('labAp')}
+                        href="#lab-appointment"
+                        role="tab"
+                      >
+                        Lab Appointments
+                      </a>
+                    </li>
 
-                      <li className="nav-item" role="presentation">
-                        <a
-                          className="nav-link"
-                          id="home-tab"
-                          data-bs-toggle="tab"
-                          href="#home"
-                          role="tab"
-                        >
-                          Prescriptions
-                        </a>
-                      </li>
+                    <li className="nav-item" role="presentation">
+                      <a
+                        className="nav-link"
+                        id="home-tab"
+                        onClick={() => setActiveTab('prescriptions')}
+                        data-bs-toggle="tab"
+                        href="#home"
+                        role="tab"
+                      >
+                        Prescriptions
+                      </a>
+                    </li>
 
-                      <li className="nav-item" role="presentation">
-                        <a
-                          className="nav-link"
-                          id="lab-tab"
-                          data-bs-toggle="tab"
-                          href="#lab"
-                          role="tab"
-                        >
-                          Lab Test
-                        </a>
-                      </li>
-
-
-                      <li className="nav-item" role="presentation">
-                        <a
-                          className="nav-link"
-                          id="contact-tab"
-                          data-bs-toggle="tab"
-                          href="#contact"
-                          role="tab"
-                        >
-                          My NeoCard
-                        </a>
-                      </li>
+                    <li className="nav-item" role="presentation">
+                      <a
+                        className="nav-link"
+                        id="lab-tab"
+                        data-bs-toggle="tab"
+                        onClick={() => setActiveTab('labReport')}
+                        href="#lab"
+                        role="tab"
+                      >
+                        Lab Test
+                      </a>
+                    </li>
 
 
+                    <li className="nav-item" role="presentation">
+                      <a
+                        className="nav-link"
+                        id="contact-tab"
+                        data-bs-toggle="tab"
+                        href="#contact"
+                        role="tab"
+                      >
+                        My NeoCard
+                      </a>
+                    </li>
 
-                    </ul>
-                  </div>
-                  <div className="">
-                    <div className="patient-bio-tab px-0">
-                      <div className="tab-content" id="myTabContent">
 
-                        <div className="tab-pane fade "
-                          id="appointment"
-                          role="tabpanel">
-                          <div className="row">
-                            <div className="col-lg-12 col-md-12 col-sm-12">
-                              <div className="table-section">
-                                <div className="table table-responsive mb-0">
-                                  <table className="table mb-0">
-                                    <thead>
-                                      <tr>
-                                        <th>#</th>
-                                        <th>Appointment  Id</th>
-                                        <th>Patient</th>
-                                        <th>Appointment  Date</th>
-                                        <th>Doctor</th>
 
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
+                  </ul>
+                </div>
+                <div className="">
+                  <div className="patient-bio-tab px-0">
+                    <div className="tab-content" id="myTabContent">
 
-                                      {pastAppointments?.length > 0 &&
-                                        pastAppointments?.map((item, key) =>
-                                          <tr key={key}>
-                                            <td>{key + 1}.</td>
-                                            <td> #{item?.customId}</td>
-                                            <td>
-                                              <div className="admin-table-bx">
-                                                <div className="admin-table-sub-bx">
-                                                  <img src={patientData?.profileImage ?
-                                                    `${base_url}/${patientData?.profileImage}` : "/admin-tb-logo.png"} alt=""
-                                                    onError={(e) => {
-                                                      e.target.onerror = null;
-                                                      e.target.src = "/admin-tb-logo.png";
-                                                    }} />
-                                                  <div className="admin-table-sub-details doctor-title">
-                                                    <h6>{patientUser?.name} </h6>
-                                                    <p>{patientUser?.nh12}</p>
-                                                  </div>
+                      <div className="tab-pane fade "
+                        id="appointment"
+                        role="tabpanel">
+                        <div className="row">
+                          <div className="col-lg-12 col-md-12 col-sm-12">
+                            <div className="table-section">
+                              <div className="table table-responsive mb-0">
+                                <table className="table mb-0">
+                                  <thead>
+                                    <tr>
+                                      <th>#</th>
+                                      <th>Appointment  Id</th>
+                                      <th>Patient</th>
+                                      <th>Appointment  Date</th>
+                                      <th>Doctor</th>
+
+                                      <th>Status</th>
+                                      <th>Action</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+
+                                    {pastAppointments?.length > 0 &&
+                                      pastAppointments?.map((item, key) =>
+                                        <tr key={key}>
+                                          <td>{key + 1}.</td>
+                                          <td> #{item?.customId}</td>
+                                          <td>
+                                            <div className="admin-table-bx">
+                                              <div className="admin-table-sub-bx">
+                                                <img src={patientData?.profileImage ?
+                                                  `${base_url}/${patientData?.profileImage}` : "/admin-tb-logo.png"} alt=""
+                                                  onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = "/admin-tb-logo.png";
+                                                  }} />
+                                                <div className="admin-table-sub-details doctor-title">
+                                                  <h6>{patientUser?.name} </h6>
+                                                  <p>{patientUser?.nh12}</p>
                                                 </div>
                                               </div>
-                                            </td>
-                                            <td>
-                                              {formatDateTime(item?.date)}
-                                            </td>
-                                            <td>
-                                              <div className="admin-table-bx">
-                                                <div className="admin-table-sub-bx">
-                                                  <img src={item?.doctor?.profileImage ?
-                                                    `${base_url}/${item?.doctor?.profileImage}` : "/doctor-avatr.png"} alt=""
-                                                    onError={(e) => {
-                                                      e.target.onerror = null;
-                                                      e.target.src = "/doctor-avatr.png";
-                                                    }} />
-                                                  <div className="admin-table-sub-details doctor-title">
-                                                    <h6>{item?.doctorId?.name} </h6>
-                                                    <p>{item?.doctorId?.nh12}</p>
-                                                  </div>
+                                            </div>
+                                          </td>
+                                          <td>
+                                            {formatDateTime(item?.date)}
+                                          </td>
+                                          <td>
+                                            <div className="admin-table-bx">
+                                              <div className="admin-table-sub-bx">
+                                                <img src={item?.doctor?.profileImage ?
+                                                  `${base_url}/${item?.doctor?.profileImage}` : "/doctor-avatr.png"} alt=""
+                                                  onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = "/doctor-avatr.png";
+                                                  }} />
+                                                <div className="admin-table-sub-details doctor-title">
+                                                  <h6>{item?.doctorId?.name} </h6>
+                                                  <p>{item?.doctorId?.nh12}</p>
                                                 </div>
                                               </div>
-                                            </td>
+                                            </div>
+                                          </td>
 
 
-                                            <td >{item?.status == 'completed' ? <span className="approved approved-active ">Completed </span>
-                                              : <span className="approved approved-active leaved text-capitalize">{item?.status} </span>}</td>
-                                            <td>
-                                              <div class="dropdown">
-                                                <a
-                                                  href="javascript:void(0)"
-                                                  class="grid-dots-btn"
-                                                  id="acticonMenu1"
-                                                  data-bs-toggle="dropdown"
-                                                  aria-expanded="false"
-                                                >
-                                                  <TbGridDots />
-                                                </a>
-                                                <ul
-                                                  class="dropdown-menu dropdown-menu-end  tble-action-menu admin-dropdown-card"
-                                                  aria-labelledby="acticonMenu1"
-                                                >
-                                                  <li className="prescription-item">
-                                                    <Link class="prescription-nav" to={`/doctor-appointment-details/${item?._id}`}>
-                                                      View  Appointment
-                                                    </Link>
-                                                  </li>
-                                                  {/* <li className="prescription-item">
+                                          <td >{item?.status == 'completed' ? <span className="approved approved-active ">Completed </span>
+                                            : <span className="approved approved-active leaved text-capitalize">{item?.status} </span>}</td>
+                                          <td>
+                                            <div class="dropdown">
+                                              <a
+                                                href="javascript:void(0)"
+                                                class="grid-dots-btn"
+                                                id="acticonMenu1"
+                                                data-bs-toggle="dropdown"
+                                                aria-expanded="false"
+                                              >
+                                                <TbGridDots />
+                                              </a>
+                                              <ul
+                                                class="dropdown-menu dropdown-menu-end  tble-action-menu admin-dropdown-card"
+                                                aria-labelledby="acticonMenu1"
+                                              >
+                                                <li className="prescription-item">
+                                                  <Link class="prescription-nav" to={`/doctor-appointment-details/${item?._id}`}>
+                                                    View  Appointment
+                                                  </Link>
+                                                </li>
+                                                {/* <li className="prescription-item">
                                                   <a class="prescription-nav" href="#" >
                                                     Edit
                                                   </a>
@@ -453,112 +473,112 @@ function PatientsPersonalInfo() {
                                                   </a>
                                                 </li> */}
 
-                                                </ul>
-                                              </div>
-
-                                            </td>
-                                          </tr>)}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </div>
-                              <Pagination page={cDocAp} totalPages={tDocPage} onPageChange={(p) => loadAppointments(p)} />
-
-                            </div>
-                          </div>
-                        </div>
-                        <div className="tab-pane fade"
-                          id="lab-appointment"
-                          role="tabpanel">
-                          <div className="row">
-                            <div className="col-lg-12 col-md-12 col-sm-12">
-                              <div className="table-section">
-                                <div className="table table-responsive mb-0">
-                                  <table className="table mb-0">
-                                    <thead>
-                                      <tr>
-                                        <th>#</th>
-                                        <th>Appointment  Id</th>
-                                        <th>Patient</th>
-                                        <th>Appointment  Details</th>
-                                        <th>Laboratory</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-
-                                      {labAppointments?.length > 0 &&
-                                        labAppointments?.map((item, key) =>
-                                          <tr key={key}>
-                                            <td>{key + 1}.</td>
-                                            <td> #{item?.customId}</td>
-                                            <td>
-                                              <div className="admin-table-bx">
-                                                <div className="admin-table-sub-bx">
-                                                  <img src={patientData?.profileImage ?
-                                                    `${base_url}/${patientData?.profileImage}` : "/admin-tb-logo.png"} alt=""
-                                                    onError={(e) => {
-                                                      e.target.onerror = null;
-                                                      e.target.src = "/admin-tb-logo.png";
-                                                    }} />
-                                                  <div className="admin-table-sub-details doctor-title">
-                                                    <h6>{patientUser?.name} </h6>
-                                                    <p>{patientUser?.nh12}</p>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </td>
-                                            <td>
-                                              <ul className="ad-info-list">
-                                                <li className="ad-info-item"><span className="ad-info-title">Appointment Date : </span> {new Date(item?.date)?.toLocaleString('en-GB')}</li>
-                                                <li className="ad-info-item"><span className="ad-info-title">Total Amount : </span>₹ {item?.fees}</li>
-                                                <li className="ad-info-item patient-report-item"><span className="ad-info-title">Test: </span>{item?.testId?.map((test, key) => <> {test?.shortName}</>)}</li>
                                               </ul>
-                                            </td>
+                                            </div>
 
-                                            <td>
-                                              <div className="admin-table-bx">
-                                                <div className="admin-table-sub-bx ">
-                                                  <div className="laboratory-pic">
-                                                    <img src={item?.lab?.logo ?
-                                                      `${base_url}/${item?.lab?.logo}` : "/profile-tab-avatar.png"} alt=""
-                                                      onError={(e) => {
-                                                        e.target.onerror = null;
-                                                        e.target.src = "/profile-tab-avatar.png";
-                                                      }} />
-                                                  </div>
-                                                  <div className="admin-table-sub-details ">
-                                                    <h6>{item?.labId?.name}</h6>
-                                                    <p>{item?.labId?.nh12}</p>
-                                                  </div>
+                                          </td>
+                                        </tr>)}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                            <Pagination page={cDocAp} totalPages={tDocPage} onPageChange={(p) => setCDocAp(p)} />
+
+                          </div>
+                        </div>
+                      </div>
+                      <div className="tab-pane fade"
+                        id="lab-appointment"
+                        role="tabpanel">
+                        <div className="row">
+                          <div className="col-lg-12 col-md-12 col-sm-12">
+                            <div className="table-section">
+                              <div className="table table-responsive mb-0">
+                                <table className="table mb-0">
+                                  <thead>
+                                    <tr>
+                                      <th>#</th>
+                                      <th>Appointment  Id</th>
+                                      <th>Patient</th>
+                                      <th>Appointment  Details</th>
+                                      <th>Laboratory</th>
+                                      <th>Status</th>
+                                      <th>Action</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+
+                                    {labAppointments?.length > 0 &&
+                                      labAppointments?.map((item, key) =>
+                                        <tr key={key}>
+                                          <td>{key + 1}.</td>
+                                          <td> #{item?.customId}</td>
+                                          <td>
+                                            <div className="admin-table-bx">
+                                              <div className="admin-table-sub-bx">
+                                                <img src={patientData?.profileImage ?
+                                                  `${base_url}/${patientData?.profileImage}` : "/admin-tb-logo.png"} alt=""
+                                                  onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = "/admin-tb-logo.png";
+                                                  }} />
+                                                <div className="admin-table-sub-details doctor-title">
+                                                  <h6>{patientUser?.name} </h6>
+                                                  <p>{patientUser?.nh12}</p>
                                                 </div>
                                               </div>
-                                            </td>
+                                            </div>
+                                          </td>
+                                          <td>
+                                            <ul className="ad-info-list">
+                                              <li className="ad-info-item"><span className="ad-info-title">Appointment Date : </span> {new Date(item?.date)?.toLocaleString('en-GB')}</li>
+                                              <li className="ad-info-item"><span className="ad-info-title">Total Amount : </span>₹ {item?.fees}</li>
+                                              <li className="ad-info-item patient-report-item"><span className="ad-info-title">Test: </span>{item?.testId?.map((test, key) => <> {test?.shortName}</>)}</li>
+                                            </ul>
+                                          </td>
 
-                                            <td >{item?.status == 'completed' ? <span className="approved approved-active ">Completed </span>
-                                              : <span className="approved approved-active leaved text-capitalize">{item?.status} </span>}</td>
-                                            <td>
-                                              <div class="dropdown">
-                                                <a
-                                                  href="javascript:void(0)"
-                                                  class="grid-dots-btn"
-                                                  id="acticonMenu1"
-                                                  data-bs-toggle="dropdown"
-                                                  aria-expanded="false"
-                                                >
-                                                  <TbGridDots />
-                                                </a>
-                                                <ul
-                                                  class="dropdown-menu dropdown-menu-end  tble-action-menu admin-dropdown-card"
-                                                  aria-labelledby="acticonMenu1"
-                                                >
-                                                  <li className="prescription-item">
-                                                    <Link class="prescription-nav" to={`/lab-appointment-details/${item?._id}`}>
-                                                      View  Appointment
-                                                    </Link>
-                                                  </li>
-                                                  {/* <li className="prescription-item">
+                                          <td>
+                                            <div className="admin-table-bx">
+                                              <div className="admin-table-sub-bx ">
+                                                <div className="laboratory-pic">
+                                                  <img src={item?.lab?.logo ?
+                                                    `${base_url}/${item?.lab?.logo}` : "/profile-tab-avatar.png"} alt=""
+                                                    onError={(e) => {
+                                                      e.target.onerror = null;
+                                                      e.target.src = "/profile-tab-avatar.png";
+                                                    }} />
+                                                </div>
+                                                <div className="admin-table-sub-details ">
+                                                  <h6>{item?.labId?.name}</h6>
+                                                  <p>{item?.labId?.nh12}</p>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </td>
+
+                                          <td >{item?.status == 'completed' ? <span className="approved approved-active ">Completed </span>
+                                            : <span className="approved approved-active leaved text-capitalize">{item?.status} </span>}</td>
+                                          <td>
+                                            <div class="dropdown">
+                                              <a
+                                                href="javascript:void(0)"
+                                                class="grid-dots-btn"
+                                                id="acticonMenu1"
+                                                data-bs-toggle="dropdown"
+                                                aria-expanded="false"
+                                              >
+                                                <TbGridDots />
+                                              </a>
+                                              <ul
+                                                class="dropdown-menu dropdown-menu-end  tble-action-menu admin-dropdown-card"
+                                                aria-labelledby="acticonMenu1"
+                                              >
+                                                <li className="prescription-item">
+                                                  <Link class="prescription-nav" to={`/lab-appointment-details/${item?._id}`}>
+                                                    View  Appointment
+                                                  </Link>
+                                                </li>
+                                                {/* <li className="prescription-item">
                                                   <a class="prescription-nav" href="#" >
                                                     Edit
                                                   </a>
@@ -569,365 +589,366 @@ function PatientsPersonalInfo() {
                                                   </a>
                                                 </li> */}
 
-                                                </ul>
-                                              </div>
+                                              </ul>
+                                            </div>
 
-                                            </td>
-                                          </tr>)}
-                                    </tbody>
-                                  </table>
-                                </div>
+                                          </td>
+                                        </tr>)}
+                                  </tbody>
+                                </table>
                               </div>
                             </div>
-                            <Pagination page={cLabAp} totalPages={tLabPage} onPageChange={(p) => loadLabAppointments(p)} />
                           </div>
+                          <Pagination page={cLabAp} totalPages={tLabPage} onPageChange={(p) => setCLabAp(p)} />
                         </div>
+                      </div>
 
-                        <div
-                          className="tab-pane fade"
-                          id="home"
-                          role="tabpanel"
-                        >
-                          <div className="row">
+                      <div
+                        className="tab-pane fade"
+                        id="home"
+                        role="tabpanel"
+                      >
+                        <div className="row">
 
-                            {prescriptions?.length > 0 &&
-                              prescriptions?.map((item, key) =>
-                                <div className="col-lg-4 col-md-6 col-sm-12 mb-3">
+                          {prescriptions?.length > 0 &&
+                            prescriptions?.map((item, key) =>
+                              <div className="col-lg-4 col-md-6 col-sm-12 mb-3">
 
-                                  <div className="qrcode-prescriptions-bx">
-                                    <div className="admin-table-bx d-flex flex-row align-items-center justify-content-between qr-cd-headr">
-                                      <div className="">
-                                        <div className="admin-table-sub-details d-flex align-items-center gap-2">
-                                          <img src="/prescriptions.png" alt="" />
-                                          <div>
-                                            <h6 className="fs-16 fw-600 text-black">Prescriptions</h6>
-                                            <p className="fs-14 fw-500">{new Date(item?.prescriptionId?.createdAt)?.toLocaleDateString('en-GB')}</p>
-                                          </div>
+                                <div className="qrcode-prescriptions-bx">
+                                  <div className="admin-table-bx d-flex flex-row align-items-center justify-content-between qr-cd-headr">
+                                    <div className="">
+                                      <div className="admin-table-sub-details d-flex align-items-center gap-2">
+                                        <img src="/prescriptions.png" alt="" />
+                                        <div>
+                                          <h6 className="fs-16 fw-600 text-black">Prescriptions</h6>
+                                          <p className="fs-14 fw-500">{new Date(item?.prescriptionId?.createdAt)?.toLocaleDateString('en-GB')}</p>
                                         </div>
-
                                       </div>
 
+                                    </div>
+
+                                    <div>
+                                      <span className="active-barcode">{item?.prescriptionId?.status}</span>
+                                    </div>
+
+                                  </div>
+
+                                  <div className="barcode-active-bx">
+                                    <div className="d-flex align-items-center justify-content-between mb-3">
+                                      <div className="admin-table-bx">
+                                        <div className="">
+                                          <div className="admin-table-sub-details d-flex align-items-center gap-2 doctor-title ">
+                                            <img src={item?.doctor?.profileImage ?
+                                              `${base_url}/${item?.doctor?.profileImage}` : "/doctor-avatr.png"} alt=""
+                                              onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = "/admin-tb-logo.png";
+                                              }} />
+                                            <div>
+                                              <h6>{item?.doctorId?.name}</h6>
+                                              <p className="fs-14 fw-500">{item?.doctorId?.nh12}</p>
+                                            </div>
+                                          </div>
+
+                                        </div>
+                                      </div>
+
+                                      <div className="d-flex align-items gap-2">
+                                        <button type="button" className="card-sw-btn"><FontAwesomeIcon icon={faPrint} /></button>
+                                        <button type="button" className="card-sw-btn" data-bs-toggle="modal" data-bs-target="#add-Prescription" onClick={() => setPastPresData(item?.prescriptionId)}><FontAwesomeIcon icon={faEye} /></button>
+                                      </div>
+                                    </div>
+
+                                    <div className="barcd-scannr barcde-scnnr-card">
+                                      <div className="barcd-content">
+                                        <h4>{item?.prescriptionId?.customId}</h4>
+                                        {/* <img src="/barcode.png" alt="" /> */}
+                                        <Barcode value={item?.prescriptionId?.customId} width={4}
+                                          displayValue={false}
+                                          height={60} />
+                                      </div>
+
+                                      <div className="barcode-id-details">
+                                        <div>
+                                          <h6>Patient Id </h6>
+                                          <p>{patientUser?.nh12}</p>
+                                        </div>
+
+
+                                        <div>
+                                          <h6>Appointment ID </h6>
+                                          <p>{item?.customId}</p>
+                                        </div>
+                                      </div>
+
+                                    </div>
+
+
+                                  </div>
+
+                                </div>
+
+                              </div>)}
+                          <Pagination page={cPresAp} totalPages={tPresPage} onPageChange={(p) => setCPresAp(p)} />
+                        </div>
+                      </div>
+
+                      <div className="tab-pane fade" id="lab" role="tabpanel">
+                        <div className="row">
+
+                          {labReports?.length > 0 &&
+                            labReports?.map((item, key) =>
+                              <div className="col-lg-4 col-md-6 col-sm-12 mb-3" key={key}>
+                                <div className="qrcode-prescriptions-bx">
+                                  <div className="admin-table-bx d-flex align-items-center flex-row justify-content-between qr-cd-headr">
+                                    <div className="admin-table-sub-details final-reprt d-flex align-items-center gap-2">
+                                      <img src="/reprt-plus.png" alt="" className="rounded-0" />
                                       <div>
-                                        <span className="active-barcode">{item?.prescriptionId?.status}</span>
-                                      </div>
+                                        <h6 className="fs-16 fw-600 text-black">Final Diagnostic Report</h6>
+                                        <p className="fs-14 fw-500">{item?.labId?.nh12?.slice(-6)}</p>
 
+                                      </div>
                                     </div>
-
-                                    <div className="barcode-active-bx">
-                                      <div className="d-flex align-items-center justify-content-between mb-3">
-                                        <div className="admin-table-bx">
-                                          <div className="">
-                                            <div className="admin-table-sub-details d-flex align-items-center gap-2 doctor-title ">
-                                              <img src={item?.doctor?.profileImage ?
-                                                `${base_url}/${item?.doctor?.profileImage}` : "/doctor-avatr.png"} alt=""
-                                                onError={(e) => {
-                                                  e.target.onerror = null;
-                                                  e.target.src = "/admin-tb-logo.png";
-                                                }} />
-                                              <div>
-                                                <h6>{item?.doctorId?.name}</h6>
-                                                <p className="fs-14 fw-500">{item?.doctorId?.nh12}</p>
-                                              </div>
-                                            </div>
-
-                                          </div>
-                                        </div>
-
-                                        <div className="d-flex align-items gap-2">
-                                          <button type="button" className="card-sw-btn"><FontAwesomeIcon icon={faPrint} /></button>
-                                          <button type="button" className="card-sw-btn" data-bs-toggle="modal" data-bs-target="#add-Prescription" onClick={() => setPastPresData(item?.prescriptionId)}><FontAwesomeIcon icon={faEye} /></button>
-                                        </div>
-                                      </div>
-
-                                      <div className="barcd-scannr barcde-scnnr-card">
-                                        <div className="barcd-content">
-                                          <h4>{item?.prescriptionId?.customId}</h4>
-                                          {/* <img src="/barcode.png" alt="" /> */}
-                                          <Barcode value={item?.prescriptionId?.customId} width={4}
-                                            displayValue={false}
-                                            height={60} />
-                                        </div>
-
-                                        <div className="barcode-id-details">
-                                          <div>
-                                            <h6>Patient Id </h6>
-                                            <p>{patientUser?.nh12}</p>
-                                          </div>
-
-
-                                          <div>
-                                            <h6>Appointment ID </h6>
-                                            <p>{item?.customId}</p>
-                                          </div>
-                                        </div>
-
-                                      </div>
-
-
-                                    </div>
-
                                   </div>
-
-                                </div>)}
-                                <Pagination page={cPresAp} totalPages={tPresPage} onPageChange={(p) => loadPrescriptions(p)} />
-                          </div>
-                        </div>
-
-                        <div className="tab-pane fade" id="lab" role="tabpanel">
-                          <div className="row">
-
-                            {labReports?.length > 0 &&
-                              labReports?.map((item, key) =>
-                                <div className="col-lg-4 col-md-6 col-sm-12 mb-3" key={key}>
-                                  <div className="qrcode-prescriptions-bx">
-                                    <div className="admin-table-bx d-flex align-items-center flex-row justify-content-between qr-cd-headr">
-                                      <div className="admin-table-sub-details final-reprt d-flex align-items-center gap-2">
-                                        <img src="/reprt-plus.png" alt="" className="rounded-0" />
+                                  <div className="barcode-active-bx">
+                                    <div className="mb-2">
+                                      <div className="admin-table-sub-details d-flex align-items-center justify-content-between doctor-title ">
                                         <div>
-                                          <h6 className="fs-16 fw-600 text-black">Final Diagnostic Report</h6>
-                                          <p className="fs-14 fw-500">{item?.labId?.nh12?.slice(-6)}</p>
-
+                                          <h6>{item?.labId?.name}</h6>
+                                          <p className="fs-14 fw-500">{item?.labId?.nh12}</p>
                                         </div>
                                       </div>
                                     </div>
-                                    <div className="barcode-active-bx">
-                                      <div className="mb-2">
-                                        <div className="admin-table-sub-details d-flex align-items-center justify-content-between doctor-title ">
-                                          <div>
-                                            <h6>{item?.labId?.name}</h6>
-                                            <p className="fs-14 fw-500">{item?.labId?.nh12}</p>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div className="barcd-scannr barcde-scnnr-card">
-                                        <div className="barcd-content">
-                                          <h4 className="mb-1">{item?.customId}</h4>
+                                    <div className="barcd-scannr barcde-scnnr-card">
+                                      <div className="barcd-content">
+                                        <h4 className="mb-1">{item?.customId}</h4>
 
-                                          <ul class="qrcode-list">
-                                            <li class="qrcode-item">Test  <span class="qrcode-title">: {item?.testId?.shortName}</span></li>
-                                            <li class="qrcode-item">Draw  <span class="qrcode-title"> : {new Date(item?.createdAt)?.toLocaleString('en-GB')}</span> </li>
-                                          </ul>
-                                          {/* <img src="/barcode.png" alt="" /> */}
-                                          <Barcode value={item?._id} width={1} displayValue={false}
-                                            height={60} />
-                                        </div>
-
-                                        <div className="barcode-id-details">
-                                          <div>
-                                            <h6>Patient Id </h6>
-                                            <p>PS-{customId}</p>
-                                          </div>
-                                          <div>
-                                            <h6>Appointment ID </h6>
-                                            <p>{item?.appointmentId?.customId}</p>
-                                          </div>
-                                        </div>
+                                        <ul class="qrcode-list">
+                                          <li class="qrcode-item">Test  <span class="qrcode-title">: {item?.testId?.shortName}</span></li>
+                                          <li class="qrcode-item">Draw  <span class="qrcode-title"> : {new Date(item?.createdAt)?.toLocaleString('en-GB')}</span> </li>
+                                        </ul>
+                                        {/* <img src="/barcode.png" alt="" /> */}
+                                        <Barcode value={item?._id} width={1} displayValue={false}
+                                          height={60} />
                                       </div>
 
-                                      <div className="text-center mt-3">
-                                        <a
-                                          disabled={pdfLoading !== null}
-                                          target="_blank"
-                                          href={base_url+'/'+item?.upload?.report}
-                                          // onClick={() =>
-                                          //   handleReportDownload(item?.appointmentId?._id, item?.testId?._id, item?._id)
-                                          // }
-                                          className="pdf-download-tbn py-2"><FontAwesomeIcon icon={faFilePdf} style={{ color: "#EF5350" }} />
-                                          {pdfLoading == item?._id ? 'Downloading' : 'Download'}</a>
-
+                                      <div className="barcode-id-details">
+                                        <div>
+                                          <h6>Patient Id </h6>
+                                          <p>PS-{customId}</p>
+                                        </div>
+                                        <div>
+                                          <h6>Appointment ID </h6>
+                                          <p>{item?.appointmentId?.customId}</p>
+                                        </div>
                                       </div>
+                                    </div>
+
+                                    <div className="text-center mt-3">
+                                      <a
+                                        disabled={pdfLoading !== null}
+                                        target="_blank"
+                                        href={base_url + '/' + item?.upload?.report}
+                                        // onClick={() =>
+                                        //   handleReportDownload(item?.appointmentId?._id, item?.testId?._id, item?._id)
+                                        // }
+                                        className="pdf-download-tbn py-2"><FontAwesomeIcon icon={faFilePdf} style={{ color: "#EF5350" }} />
+                                        {pdfLoading == item?._id ? 'Downloading' : 'Download'}</a>
 
                                     </div>
 
                                   </div>
-                                </div>)}
-                                <Pagination page={cReport} totalPages={tReportPage} onPageChange={(p) => loadReports(p)} />
 
-                          </div>
+                                </div>
+                              </div>)}
+                          <Pagination page={cReport} totalPages={tReportPage} onPageChange={(p) => setCReport(p)} />
+
                         </div>
+                      </div>
 
-                        <div className="tab-pane fade show active" id="personal" role="tabpanel">
-                          <div className="row">
-                            <div className="col-lg-3 col-md-3 col-sm-12 mb-3">
-                              <div className="view-employee-bx patients-personal-info-card">
+                      <div className="tab-pane fade show active" id="personal" role="tabpanel">
+                        <div className="row">
+                          <div className="col-lg-3 col-md-3 col-sm-12 mb-3">
+                            <div className="view-employee-bx patients-personal-info-card">
+                              <div>
+                                <div className="view-avatr-bio-bx text-center">
+                                  <img src={patientData?.profileImage ?
+                                    `${base_url}/${patientData?.profileImage}` : "/admin-tb-logo.png"} alt=""
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = "/admin-tb-logo.png";
+                                    }} />
+                                  <h4>{patientUser?.name}</h4>
+                                  <p><span className="vw-id">ID:</span> {patientUser?.nh12}</p>
+                                  <h6 className="vw-activ text-capitalize">{patientData?.status}</h6>
+
+                                </div>
+
                                 <div>
-                                  <div className="view-avatr-bio-bx text-center">
-                                    <img src={patientData?.profileImage ?
-                                      `${base_url}/${patientData?.profileImage}` : "/admin-tb-logo.png"} alt=""
-                                      onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = "/admin-tb-logo.png";
-                                      }} />
-                                    <h4>{patientUser?.name}</h4>
-                                    <p><span className="vw-id">ID:</span> {patientUser?.nh12}</p>
-                                    <h6 className="vw-activ text-capitalize">{patientData?.status}</h6>
+                                  <ul className="vw-info-list">
+                                    <li className="vw-info-item">
+                                      <span className="vw-info-icon"><FontAwesomeIcon icon={faPerson} /></span>
+                                      <div>
+                                        <p className="vw-info-title">Age</p>
+                                        <p className="vw-info-value">{calculateAge(demographic?.dob)} Year</p>
+                                      </div>
+                                    </li>
 
-                                  </div>
+                                    <li className="vw-info-item">
+                                      <span className="vw-info-icon"><FontAwesomeIcon icon={faCalendar} /></span>
+                                      <div>
+                                        <p className="vw-info-title">Gender </p>
+                                        <p className="vw-info-value">{patientData?.gender}</p>
+                                      </div>
+                                    </li>
 
-                                  <div>
-                                    <ul className="vw-info-list">
-                                      <li className="vw-info-item">
-                                        <span className="vw-info-icon"><FontAwesomeIcon icon={faPerson} /></span>
-                                        <div>
-                                          <p className="vw-info-title">Age</p>
-                                          <p className="vw-info-value">{calculateAge(demographic?.dob)} Year</p>
-                                        </div>
-                                      </li>
+                                    <li className="vw-info-item">
+                                      <span className="vw-info-icon"><FontAwesomeIcon icon={faDroplet} /></span>
+                                      <div>
+                                        <p className="vw-info-title">Blood  Group </p>
+                                        <p className="vw-info-value">{demographic?.bloodGroup}</p>
+                                      </div>
+                                    </li>
 
-                                      <li className="vw-info-item">
-                                        <span className="vw-info-icon"><FontAwesomeIcon icon={faCalendar} /></span>
-                                        <div>
-                                          <p className="vw-info-title">Gender </p>
-                                          <p className="vw-info-value">{patientData?.gender}</p>
-                                        </div>
-                                      </li>
+                                    <li className="vw-info-item">
+                                      <span className="vw-info-icon"><FontAwesomeIcon icon={faEnvelope} /></span>
+                                      <div>
+                                        <p className="vw-info-title">Email </p>
+                                        <p className="vw-info-value">{patientData?.email}</p>
+                                      </div>
+                                    </li>
 
-                                      <li className="vw-info-item">
-                                        <span className="vw-info-icon"><FontAwesomeIcon icon={faDroplet} /></span>
-                                        <div>
-                                          <p className="vw-info-title">Blood  Group </p>
-                                          <p className="vw-info-value">{demographic?.bloodGroup}</p>
-                                        </div>
-                                      </li>
+                                    <li className="vw-info-item">
+                                      <span className="vw-info-icon"><FontAwesomeIcon icon={faPhone} /></span>
+                                      <div>
+                                        <p className="vw-info-title">Phone </p>
+                                        <p className="vw-info-value">{patientData?.contactNumber}</p>
+                                      </div>
+                                    </li>
 
-                                      <li className="vw-info-item">
-                                        <span className="vw-info-icon"><FontAwesomeIcon icon={faEnvelope} /></span>
-                                        <div>
-                                          <p className="vw-info-title">Email </p>
-                                          <p className="vw-info-value">{patientData?.email}</p>
-                                        </div>
-                                      </li>
+                                    {demographic?.contact?.emergencyContactName && <li className="vw-info-item">
+                                      <span className="vw-info-icon"><FontAwesomeIcon icon={faPhone} /></span>
+                                      <div>
+                                        <p className="vw-info-title">Emergency Contact Name </p>
+                                        <p className="vw-info-value"><span className="fw-700">({demographic?.contact?.emergencyContactName}) </span> {demographic?.contact?.emergencyContactNumber}</p>
+                                      </div>
+                                    </li>}
 
-                                      <li className="vw-info-item">
-                                        <span className="vw-info-icon"><FontAwesomeIcon icon={faPhone} /></span>
-                                        <div>
-                                          <p className="vw-info-title">Phone </p>
-                                          <p className="vw-info-value">{patientData?.contactNumber}</p>
-                                        </div>
-                                      </li>
+                                    <li className="vw-info-item">
+                                      <span className="vw-info-icon"><FontAwesomeIcon icon={faLocationDot} /></span>
+                                      <div>
+                                        <p className="vw-info-title">Address</p>
+                                        <p className="vw-info-value">{demographic?.address}</p>
+                                      </div>
+                                    </li>
 
-                                      {demographic?.contact?.emergencyContactName && <li className="vw-info-item">
-                                        <span className="vw-info-icon"><FontAwesomeIcon icon={faPhone} /></span>
-                                        <div>
-                                          <p className="vw-info-title">Emergency Contact Name </p>
-                                          <p className="vw-info-value"><span className="fw-700">({demographic?.contact?.emergencyContactName}) </span> {demographic?.contact?.emergencyContactNumber}</p>
-                                        </div>
-                                      </li>}
-
-                                      <li className="vw-info-item">
-                                        <span className="vw-info-icon"><FontAwesomeIcon icon={faLocationDot} /></span>
-                                        <div>
-                                          <p className="vw-info-title">Address</p>
-                                          <p className="vw-info-value">{demographic?.address}</p>
-                                        </div>
-                                      </li>
-
-                                    </ul>
-
-                                  </div>
+                                  </ul>
 
                                 </div>
+
                               </div>
                             </div>
-                            <div className="col-lg-9">
-                              <div className="">
-                                <div className="ovrview-bx mb-3">
-                                  <h4 className="new_title">Medical History</h4>
-                                  {/* <p className="">Robert Davis is a board-certified cardiologist with over 8 years of experience in diagnosing and treating heart conditions. She specializes in preventive cardiology and heart failure management.</p> */}
+                          </div>
+                          <div className="col-lg-9">
+                            <div className="">
+                              <div className="ovrview-bx mb-3">
+                                <h4 className="new_title">Medical History</h4>
+                                {/* <p className="">Robert Davis is a board-certified cardiologist with over 8 years of experience in diagnosing and treating heart conditions. She specializes in preventive cardiology and heart failure management.</p> */}
+                              </div>
+
+                              <div className="medical-history-content">
+                                <div>
+                                  <h4 className="fz-16 fw-700">Do you have any chronic conditions?</h4>
+                                  <h5 className="hearth-disese">{medicalHistory?.chronicCondition}</h5>
                                 </div>
 
-                                <div className="medical-history-content">
-                                  <div>
-                                    <h4 className="fz-16 fw-700">Do you have any chronic conditions?</h4>
-                                    <h5 className="hearth-disese">{medicalHistory?.chronicCondition}</h5>
-                                  </div>
-
-                                  <div className="mt-3">
-                                    <h4 className="fz-16 fw-700">Are you currently on any medications?</h4>
-                                    <h5 className="hearth-disese">{medicalHistory?.onMedication ? 'Yes' : 'No'}</h5>
-                                  </div>
-
+                                <div className="mt-3">
+                                  <h4 className="fz-16 fw-700">Are you currently on any medications?</h4>
+                                  <h5 className="hearth-disese">{medicalHistory?.onMedication ? 'Yes' : 'No'}</h5>
                                 </div>
 
-                                <div className="medical-history-content my-3">
-                                  <div>
-                                    <h4 className="fz-16 fw-700">Medication Details</h4>
-                                    <p>{medicalHistory?.medicationDetail}</p>
-                                  </div>
+                              </div>
 
-                                  <div className="mt-3">
-                                    <h4 className="fz-16 fw-700">Allergies</h4>
-                                    <p>{medicalHistory?.allergies}</p>
-                                  </div>
-
+                              <div className="medical-history-content my-3">
+                                <div>
+                                  <h4 className="fz-16 fw-700">Medication Details</h4>
+                                  <p>{medicalHistory?.medicationDetail}</p>
                                 </div>
 
-                                <div className="ovrview-bx mb-3">
-                                  <h4 className="new_title">Family Medical History</h4>
+                                <div className="mt-3">
+                                  <h4 className="fz-16 fw-700">Allergies</h4>
+                                  <p>{medicalHistory?.allergies}</p>
                                 </div>
-                                <div className="medical-history-content my-3">
-                                  <div>
-                                    <h4 className="fz-16 fw-700">Any family history of chronic disease?</h4>
-                                    <h5 className="hearth-disese">{medicalHistory?.familyHistory?.chronicHistory}</h5>
 
-                                  </div>
+                              </div>
 
-                                  <div className="mt-3">
-                                    <h4 className="fz-16 fw-700">Chronic Diseases in Family</h4>
-                                    <p> {medicalHistory?.familyHistory?.diseasesInFamily}</p>
-                                  </div>
+                              <div className="ovrview-bx mb-3">
+                                <h4 className="new_title">Family Medical History</h4>
+                              </div>
+                              <div className="medical-history-content my-3">
+                                <div>
+                                  <h4 className="fz-16 fw-700">Any family history of chronic disease?</h4>
+                                  <h5 className="hearth-disese">{medicalHistory?.familyHistory?.chronicHistory}</h5>
 
                                 </div>
 
-                                <div className="ovrview-bx mb-3">
-                                  <h4 className="new_title">Prescriptions and Reports</h4>
+                                <div className="mt-3">
+                                  <h4 className="fz-16 fw-700">Chronic Diseases in Family</h4>
+                                  <p> {medicalHistory?.familyHistory?.diseasesInFamily}</p>
                                 </div>
 
-                                <div className="row">
-                                  {prescription?.length > 0 &&
-                                    prescription?.map((item, key) =>
-                                      <div className="col-lg-6 mb-3" key={key}>
-                                        <div className="prescription-patients-card">
-                                          <div className="prescription-patients-picture">
-                                            <img src={item?.fileUrl ?
-                                              `${base_url}/${item?.fileUrl}` : "/patient-card-one.png"} alt="" />
+                              </div>
+
+                              <div className="ovrview-bx mb-3">
+                                <h4 className="new_title">Prescriptions and Reports</h4>
+                              </div>
+
+                              <div className="row">
+                                {prescription?.length > 0 &&
+                                  prescription?.map((item, key) =>
+                                    <div className="col-lg-6 mb-3" key={key}>
+                                      <div className="prescription-patients-card">
+                                        <div className="prescription-patients-picture">
+                                          <img src={item?.fileUrl ?
+                                            `${base_url}/${item?.fileUrl}` : "/patient-card-one.png"} alt="" />
+                                        </div>
+                                        <div className="card-details-bx">
+                                          <div className="card-info-title">
+                                            <h3>{item?.name}</h3>
+                                            {/* <p>8/21/2025</p> */}
                                           </div>
-                                          <div className="card-details-bx">
-                                            <div className="card-info-title">
-                                              <h3>{item?.name}</h3>
-                                              {/* <p>8/21/2025</p> */}
-                                            </div>
 
-                                            <div className="">
-                                              <button type="button" className="card-sw-btn"><FontAwesomeIcon icon={faEye} /></button>
-                                            </div>
+                                          <div className="">
+                                            <button type="button" className="card-sw-btn"><FontAwesomeIcon icon={faEye} /></button>
                                           </div>
                                         </div>
-                                      </div>)}
-                                </div>
+                                      </div>
+                                    </div>)}
                               </div>
                             </div>
                           </div>
                         </div>
-                        <div className="tab-pane fade" id="contact" role="tabpanel">
-                          <div className="row">
-                            <div className="col-lg-6">
-                              <div className="sub-tab-brd">
-                                <div className="custom-frm-bx ">
-                                  <label htmlFor="">Patient Name</label>
-                                  <input type="text" placeholder="" value='RAVI KUMAR' className="form-control nw-select-frm" />
-                                </div>
-
-                                <div className="text-end">
-                                  <button className="nw-filtr-thm-btn">Generate</button>
-                                </div>
-
+                      </div>
+                      <div className="tab-pane fade" id="contact" role="tabpanel">
+                        <div className="row">
+                          <div className="col-lg-6">
+                            <div className="sub-tab-brd">
+                              <div className="custom-frm-bx ">
+                                <label htmlFor="">Patient Name</label>
+                                <input type="text" placeholder="" value={cardData?.name} onChange={(e) => setCardData({ ...cardData, name: e.target.value })} className="form-control nw-select-frm" />
                               </div>
-                            </div>
 
-                            <div className="col-lg-6">
-                              <div className="d-flex align-items-center justify-content-center gap-2">
-                                {/* <div className="add-patients-clients">
+                              <div className="text-end">
+                                <button className="nw-filtr-thm-btn" disabled={cardData?.isReady || !patientUser?.nh12} onClick={() => setCardData({ ...cardData, isReady: !cardData.isReady })}>
+                                  {cardData.isReady ? 'Ready' : 'Generate'}</button>
+                              </div>
+
+                            </div>
+                          </div>
+
+                          <div className="col-lg-6">
+                            <div className="d-flex align-items-center justify-content-center gap-2">
+                              {/* <div className="add-patients-clients">
                                                         <img src="/premium-card.png" alt="" />
                                                         <div className="patient-card-details premium-crd-details">
                                                             <h4>RAVI Kumar</h4>
@@ -939,42 +960,41 @@ function PatientsPersonalInfo() {
 
                                                     </div> */}
 
-                                <div className="add-patients-clients premium-crd-details">
+                              <div className="add-patients-clients premium-crd-details" ref={cardRef}>
 
-                                  <div className="chip-card"></div>
-                                  <img src="/PatientNeoCard.png" alt="" />
-                                  <div className="patient-card-details nw-patient-details">
-                                    <h4 className="text-white">{patientUser?.name?.length > 20 ?
-                                      patientUser?.name?.slice(0, 17) + '...' : patientUser?.name}</h4>
-                                    <p>Patient ID</p>
-                                    <h6>{patientUser?.nh12}</h6>
-                                  </div>
-                                  <div className="qr-code-generate"></div>
-
+                                <div className="patient-chip-card"></div>
+                                <img src="/NeoCard.png" alt="" />
+                                <div className="patient-card-details nw-patient-details">
+                                  <h4 className="text-white">{cardData?.name?.length > 20 ?
+                                    cardData?.name?.slice(0, 17) + '...' : cardData?.name}</h4>
+                                  <h6>{patientUser?.nh12}</h6>
                                 </div>
+                                <div className="qr-code-generate"></div>
 
-
-
-
-                                <div>
-                                  <button className="patient-crd-down-btn"><FontAwesomeIcon icon={faDownload} /></button>
-                                </div>
                               </div>
 
+
+
+
+                              {cardData?.isReady && <div>
+                                <button className="patient-crd-down-btn" onClick={handleCardDownload}><FontAwesomeIcon icon={faDownload} /></button>
+                              </div>}
                             </div>
 
-
-
                           </div>
-                        </div>
 
+
+
+                        </div>
                       </div>
+
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-         
+          </div>
+
 
         </div>}
 
