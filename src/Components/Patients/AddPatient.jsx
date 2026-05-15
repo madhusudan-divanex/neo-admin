@@ -1,6 +1,4 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 
-import { BsPlusCircleFill } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getApiData, securePostData } from "../../Services/api";
@@ -10,14 +8,9 @@ import { toast } from "react-toastify";
 function AddPatient() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false)
-    const [patientData, setPatientData] = useState()
-
-    const [fetchById, setFetchById] = useState(false)
     const [countries, setCountries] = useState([]);
     const [states, setStates] = useState([]);
     const [cities, setCities] = useState([]);
-    const [patientId, setPatientId] = useState()
-    const [byId, setById] = useState(true)
     const [errors, setErrors] = useState({});
 
     const [form, setForm] = useState({

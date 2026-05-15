@@ -5,13 +5,13 @@ import api from "../../utils/axios";
 import JoditEditor from "jodit-react";
 
 function CmsPageEdit() {
-  const { slug , panel} = useParams();
+  const { slug, panel } = useParams();
   const navigate = useNavigate();
   const editor = useRef(null);
 
   const [form, setForm] = useState({
     title: "",
-    content: "",panel:"website",
+    content: "", panel: "website",
     status: "active",
   });
 
@@ -28,7 +28,7 @@ function CmsPageEdit() {
         title: page?.title || "",
         content: page?.content || "",
         status: page?.status || "active",
-        panel: page?.panel || "",
+        panel: panel || "",
 
       });
     } catch {
@@ -73,27 +73,27 @@ function CmsPageEdit() {
     }
   };
   const config = useMemo(() => ({
-  height: 400,
-  readonly: false,
-  toolbarAdaptive: false,
-  iframe: true,
-  iframeStyle: `
+    height: 400,
+    readonly: false,
+    toolbarAdaptive: false,
+    iframe: true,
+    iframeStyle: `
     body { font-family: sans-serif; padding: 10px; }
     ul { list-style-type: disc !important; padding-left: 2rem !important; margin: 0.5rem 0 !important; }
     ol { list-style-type: decimal !important; padding-left: 2rem !important; margin: 0.5rem 0 !important; }
     li { display: list-item !important; }
   `,
-  buttons: [
-    "bold", "italic", "underline", "|",
-    "ul", "ol", "|",
-    "font", "fontsize", "|",
-    "align", "|",
-    "link", "image", "|",
-    "table", "|",
-    "undo", "redo", "|",
-    "hr", "eraser", "fullsize",
-  ],
-}), []);
+    buttons: [
+      "bold", "italic", "underline", "|",
+      "ul", "ol", "|",
+      "font", "fontsize", "|",
+      "align", "|",
+      "link", "image", "|",
+      "table", "|",
+      "undo", "redo", "|",
+      "hr", "eraser", "fullsize",
+    ],
+  }), []);
 
   if (loading)
     return <div className="p-4 text-center">Loading...</div>;
@@ -176,7 +176,7 @@ function CmsPageEdit() {
               onBlur={(newContent) =>
                 setForm({ ...form, content: newContent })
               }
-                config={config}
+              config={config}
             />
           </div>
 
