@@ -66,7 +66,7 @@ function PatientsPersonalInfo() {
     try {
       const res = await api.get(`/api/admin/patients/detail/${params.id}`);
       if (res.data.success) {
-        setCardData({...cardData,name:res?.data?.patient?.name})
+        setCardData({ ...cardData, name: res?.data?.patient?.name })
         setPatientData(res.data.patient);
         setDemographic(res.data.demographic);
         setMedicalHisotry(res.data.medicalHistory);
@@ -93,7 +93,7 @@ function PatientsPersonalInfo() {
 
   const loadAppointments = async (page = cDocAp) => {
     try {
-      const res = await getSecureApiData(`api/admin/patients/doctor-appointments/${params.id}?page=${page}&limit=5`);
+      const res = await getSecureApiData(`api/admin/patients/doctor-appointments/${params.id}?page=${page}&limit=10`);
       if (res.success) {
         setPastAppointments(res.data);
         setTDocPage(res.totalPages)
@@ -113,7 +113,7 @@ function PatientsPersonalInfo() {
   };
   const loadReports = async (page = cReport) => {
     try {
-      const res = await getSecureApiData(`api/admin/patients/${params.id}/lab-reports?page=${page}&limit=2`);
+      const res = await getSecureApiData(`api/admin/patients/${params.id}/lab-reports?page=${page}&limit=10`);
       if (res.success) {
         setLabReports(res.data);
         setTReportPage(res.totalPages)
@@ -142,7 +142,7 @@ function PatientsPersonalInfo() {
 
   const loadLabAppointments = async (page = cLabAp) => {
     try {
-      const res = await getSecureApiData(`api/admin/patients/lab-appointments/${params.id}?page=${page}&limit=2`);
+      const res = await getSecureApiData(`api/admin/patients/lab-appointments/${params.id}?page=${page}&limit=10`);
       if (res.success) {
         setLabAppointments(res.data);
         setTLabPage(res.totalPages)
@@ -919,7 +919,7 @@ function PatientsPersonalInfo() {
                                           </div>
 
                                           <div className="">
-                                            <button type="button" className="card-sw-btn"><FontAwesomeIcon icon={faEye} /></button>
+                                            <a href={`${base_url}/${item?.fileUrl}`} target="_blank" className="card-sw-btn d-inline-block"><FontAwesomeIcon icon={faEye} /></a>
                                           </div>
                                         </div>
                                       </div>

@@ -4,10 +4,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle, faDownload, faSearch, faFilter } from "@fortawesome/free-solid-svg-icons";
 import { TbGridDots } from "react-icons/tb";
 import {
-  HiChevronDoubleLeft,
-  HiChevronDoubleRight,
-  HiChevronLeft,
-  HiChevronRight
+    HiChevronDoubleLeft,
+    HiChevronDoubleRight,
+    HiChevronLeft,
+    HiChevronRight
 } from "react-icons/hi";
 import api from "../../utils/axios";
 import toast from "react-hot-toast";
@@ -16,95 +16,96 @@ import { IMAGE_BASE_URL } from "../../utils/config";
 import { QRCodeCanvas } from "qrcode.react";
 import html2canvas from "html2canvas";
 import { useRef } from "react";
+import base_url from "../../Services/baseUrl";
 
 function DoctorInfoDetails() {
-     const { id } = useParams();
+    const { id } = useParams();
 
-  const [loading, setLoading] = useState(true);
-  const [doctor, setDoctor] = useState(null);
-  const [appointments, setAppointments] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [doctor, setDoctor] = useState(null);
+    const [appointments, setAppointments] = useState([]);
 
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [activeTab, setActiveTab] = useState("home");
-  const [cardName, setCardName]     = useState("");
-  const [cardId, setCardId]         = useState("");
-  const [cardReady, setCardReady]   = useState(false);
-  const [apptSearch, setApptSearch] = useState("");
-  const cardRef = useRef(null);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [activeTab, setActiveTab] = useState("home");
+    const [cardName, setCardName] = useState("");
+    const [cardId, setCardId] = useState("");
+    const [cardReady, setCardReady] = useState(false);
+    const [apptSearch, setApptSearch] = useState("");
+    const cardRef = useRef(null);
 
-  // Pre-fill card with doctor data when tab opens
-  const initCard = () => {
-    if (!cardName) {
-      setCardName(doctor?.name || "");
-      setCardId(doctor?.nh12 || doctor?.user?.nh12 || "");
+    // Pre-fill card with doctor data when tab opens
+    const initCard = () => {
+        if (!cardName) {
+            setCardName(doctor?.name || "");
+            setCardId(doctor?.nh12 || doctor?.user?.nh12 || "");
+        }
+    };
+
+    const handleGenerate = () => {
+        if (cardName) setCardReady(true);
+    };
+
+    const handleCardDownload = async () => {
+        if (!cardRef.current) return;
+        try {
+            const canvas = await html2canvas(cardRef.current, { scale: 2, useCORS: true });
+            const link = document.createElement("a");
+            link.download = `NeoCard_${cardId || cardName}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        } catch { }
+    };
+
+    const filteredAppointments = apptSearch
+        ? appointments.filter(a =>
+            a.patientId?.name?.toLowerCase().includes(apptSearch.toLowerCase()) ||
+            a._id?.includes(apptSearch)
+        )
+        : appointments;
+
+
+    /* ================= FETCH DOCTOR ================= */
+    const loadDoctor = async () => {
+        try {
+            setLoading(true);
+            const res = await api.get(`/api/admin/doctor/${id}`);
+            setDoctor(res.data.data);
+        } catch {
+            toast.error("Failed to load doctor details");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    /* ================= FETCH APPOINTMENTS ================= */
+    const loadAppointments = async (p = 1) => {
+        try {
+            const res = await api.get(`/api/admin/doctor/${id}/appointments`, {
+                params: { page: p, limit: 5 }
+            });
+
+            setAppointments(res.data.data || []);
+            setTotalPages(res.data.totalPages || 1);
+        } catch {
+            toast.error("Failed to load appointments");
+        }
+    };
+
+    useEffect(() => {
+        loadDoctor();
+        loadAppointments(page);
+    }, [id, page]);
+
+    if (loading) {
+        return (
+            <div className="text-center my-5">
+                <div className="spinner-border text-primary" />
+            </div>
+        );
     }
-  };
 
-  const handleGenerate = () => {
-    if (cardName) setCardReady(true);
-  };
-
-  const handleCardDownload = async () => {
-    if (!cardRef.current) return;
-    try {
-      const canvas = await html2canvas(cardRef.current, { scale: 2, useCORS: true });
-      const link = document.createElement("a");
-      link.download = `NeoCard_${cardId || cardName}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-    } catch { }
-  };
-
-  const filteredAppointments = apptSearch
-    ? appointments.filter(a =>
-        a.patientId?.name?.toLowerCase().includes(apptSearch.toLowerCase()) ||
-        a._id?.includes(apptSearch)
-      )
-    : appointments;
-
-
-  /* ================= FETCH DOCTOR ================= */
-  const loadDoctor = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get(`/api/admin/doctor/${id}`);
-      setDoctor(res.data.data);
-    } catch {
-      toast.error("Failed to load doctor details");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* ================= FETCH APPOINTMENTS ================= */
-  const loadAppointments = async (p = 1) => {
-    try {
-      const res = await api.get(`/api/admin/doctor/${id}/appointments`, {
-        params: { page: p }
-      });
-
-      setAppointments(res.data.data || []);
-      setTotalPages(res.data.totalPages || 1);
-    } catch {
-      toast.error("Failed to load appointments");
-    }
-  };
-
-  useEffect(() => {
-    loadDoctor();
-    loadAppointments(page);
-  }, [id, page]);
-
-  if (loading) {
-    return (
-      <div className="text-center my-5">
-        <div className="spinner-border text-primary" />
-      </div>
-    );
-  }
-
-  if (!doctor) return null;
+    if (!doctor) return null;
 
     return (
         <>
@@ -142,20 +143,20 @@ function DoctorInfoDetails() {
                                 <ul className="nav nav-tabs gap-3 bg-white" id="myTab" role="tablist">
                                     <li className="nav-item" role="presentation">
                                         <button
-                                        className={`nav-link ${activeTab === "home" ? "active" : ""}`}
-                                        onClick={() => setActiveTab("home")}
+                                            className={`nav-link ${activeTab === "home" ? "active" : ""}`}
+                                            onClick={() => setActiveTab("home")}
                                         >
-                                        Doctor Info
+                                            Doctor Info
                                         </button>
 
                                     </li>
 
                                     <li className="nav-item" role="presentation">
                                         <button
-                                        className={`nav-link ${activeTab === "profile" ? "active" : ""}`}
-                                        onClick={() => setActiveTab("profile")}
+                                            className={`nav-link ${activeTab === "profile" ? "active" : ""}`}
+                                            onClick={() => setActiveTab("profile")}
                                         >
-                                        Appointment List
+                                            Appointment List
                                         </button>
 
                                     </li>
@@ -164,10 +165,10 @@ function DoctorInfoDetails() {
 
                                     <li className="nav-item" role="presentation">
                                         <button
-                                        className={`nav-link ${activeTab === "card" ? "active" : ""}`}
-                                        onClick={() => setActiveTab("card")}
+                                            className={`nav-link ${activeTab === "card" ? "active" : ""}`}
+                                            onClick={() => setActiveTab("card")}
                                         >
-                                        NeoCard
+                                            NeoCard
                                         </button>
 
                                     </li>
@@ -184,18 +185,20 @@ function DoctorInfoDetails() {
                                                 <div className="doctor-information-card mb-4">
                                                     <div className="doctor-main-profile-card">
                                                         <div className="doctor-profile-pic">
-                                                            <img src={doctor?.profileImage ? `${IMAGE_BASE_URL}/uploads/doctor/${doctor.profileImage}` : "/doctor-info-pic.png"} alt="" onError={e => { e.target.src = "/doctor-info-pic.png"; }} />
+                                                            <img src={doctor?.profileImage ? `${base_url}/${doctor.profileImage}` : "/doctor-info-pic.png"} alt=""
+                                                                onError={e => { e.target.src = "/doctor-info-pic.png"; }}
+                                                            />
                                                         </div>
                                                         <div className="doctor-content-details">
                                                             <div className="doctor-info-heading">
-                                                                <h4>Dr. {doctor?.user?.name} </h4>
-                                                                <p>DO-{doctor?.user?.unique_id}</p>
+                                                                <h4>{doctor?.user?.name} </h4>
+                                                                <p>{doctor?.user?.nh12}</p>
                                                             </div>
 
                                                             <div className="doctor-info-list">
                                                                 <div className="doctor-info-item">
                                                                     <h6>Mobile Number</h6>
-                                                                    <p>{doctor.contactNumber}</p>
+                                                                    <p>{doctor?.user?.contactNumber}</p>
                                                                 </div>
 
                                                                 <div className="doctor-info-item">
@@ -205,12 +208,12 @@ function DoctorInfoDetails() {
 
                                                                 <div className="doctor-info-item">
                                                                     <h6>Email</h6>
-                                                                    <p>{doctor?.email}</p>
+                                                                    <p>{doctor?.user?.email}</p>
                                                                 </div>
 
                                                                 <div className="doctor-info-item">
                                                                     <h6>Date of Birth</h6>
-                                                                    <p>{doctor?.dob}</p>
+                                                                    <p>{new Date(doctor?.dob).toLocaleDateString('en-GB')}</p>
                                                                 </div>
 
                                                             </div>
@@ -267,9 +270,9 @@ function DoctorInfoDetails() {
                                                             <div className="doctor-info-item">
                                                                 <h6>Treatment Areas</h6>
                                                                 <p>
-                                                                {doctor?.about?.treatmentAreas?.length
-                                                                    ? doctor.about.treatmentAreas.map(item => item.name).join(", ")
-                                                                    : "N/A"}
+                                                                    {doctor?.about?.treatmentAreas?.length
+                                                                        ? doctor.about.treatmentAreas.map(item => item.name).join(", ")
+                                                                        : "N/A"}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -283,9 +286,9 @@ function DoctorInfoDetails() {
                                                             <div className="doctor-info-item">
                                                                 <h6>Languages</h6>
                                                                 <p>
-                                                                {doctor?.about?.language?.length
-                                                                    ? doctor.about.language.join(", ")
-                                                                    : "N/A"}
+                                                                    {doctor?.about?.language?.length
+                                                                        ? doctor.about.language.join(", ")
+                                                                        : "N/A"}
                                                                 </p>
 
                                                             </div>
@@ -313,16 +316,16 @@ function DoctorInfoDetails() {
 
                                                     <div className="doctor-hospital-info">
                                                         {doctor?.eduWork?.education?.map((edu) => (
-                                                        <div key={edu._id} className="doctor-hospital-pic align-items-start">
-                                                            <img src="/chevron-one.svg" alt="" />
-                                                            <div>
-                                                            <h5>{edu.university}</h5>
-                                                            <p>{edu.degree}</p>
+                                                            <div key={edu._id} className="doctor-hospital-pic align-items-start">
+                                                                <img src="/chevron-one.svg" alt="" />
+                                                                <div>
+                                                                    <h5>{edu.university}</h5>
+                                                                    <p>{edu.degree}</p>
+                                                                </div>
+                                                                <div className="ms-auto">
+                                                                    <p>{edu.startYear} to {edu.endYear}</p>
+                                                                </div>
                                                             </div>
-                                                            <div className="ms-auto">
-                                                            <p>{edu.startYear} to {edu.endYear}</p>
-                                                            </div>
-                                                        </div>
                                                         ))}
                                                     </div>
                                                 </fieldset>
@@ -335,27 +338,27 @@ function DoctorInfoDetails() {
 
                                                     <div className="doctor-hospital-info">
                                                         {doctor?.eduWork?.work?.map((work) => (
-                                                        <div key={work._id} className="doctor-hospital-pic align-items-start">
-                                                            <img src="/chevron-two.svg" alt="" />
-                                                            <div>
-                                                            <h5>{work.organization}</h5>
-                                                            <p>{work.totalYear} Years {work.month} Months</p>
+                                                            <div key={work._id} className="doctor-hospital-pic align-items-start">
+                                                                <img src="/chevron-two.svg" alt="" />
+                                                                <div>
+                                                                    <h5>{work.organization}</h5>
+                                                                    <p>{work.totalYear} Years {work.month} Months</p>
+                                                                </div>
+                                                                <div className="ms-auto">
+                                                                    <p>
+                                                                        {work.present ? (
+                                                                            <>
+                                                                                <span style={{ color: "#34A853" }}>
+                                                                                    <FontAwesomeIcon icon={faCheckCircle} />
+                                                                                </span>{" "}
+                                                                                Present
+                                                                            </>
+                                                                        ) : (
+                                                                            "Completed"
+                                                                        )}
+                                                                    </p>
+                                                                </div>
                                                             </div>
-                                                            <div className="ms-auto">
-                                                            <p>
-                                                                {work.present ? (
-                                                                <>
-                                                                    <span style={{ color: "#34A853" }}>
-                                                                    <FontAwesomeIcon icon={faCheckCircle} />
-                                                                    </span>{" "}
-                                                                    Present
-                                                                </>
-                                                                ) : (
-                                                                "Completed"
-                                                                )}
-                                                            </p>
-                                                            </div>
-                                                        </div>
                                                         ))}
                                                     </div>
                                                 </fieldset>
@@ -372,15 +375,15 @@ function DoctorInfoDetails() {
                                                         </div>
 
                                                         {doctor?.medicalLicense?.medicalLicense?.map((lic) => (
-                                                        <div key={lic._id} className="doctor-license-upload mb-3">
-                                                            <h6>{lic.certName}</h6>
-                                                            <div className="doctor-license-pic">
-                                                            <img
-                                                                src={`${IMAGE_BASE_URL}/${lic.certFile}`}
-                                                                alt=""
-                                                            />
+                                                            <div key={lic._id} className="doctor-license-upload mb-3">
+                                                                <h6>{lic.certName}</h6>
+                                                                <div className="doctor-license-pic">
+                                                                    <img
+                                                                        src={`${IMAGE_BASE_URL}/${lic.certFile}`}
+                                                                        alt=""
+                                                                    />
+                                                                </div>
                                                             </div>
-                                                        </div>
                                                         ))}
 
 
@@ -498,63 +501,65 @@ function DoctorInfoDetails() {
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                    {filteredAppointments.length === 0 ? (
-                                                                        <tr>
+                                                                {filteredAppointments.length === 0 ? (
+                                                                    <tr>
                                                                         <td colSpan="7" className="text-center py-4">
                                                                             No Appointments Found
                                                                         </td>
-                                                                        </tr>
-                                                                    ) : (
-                                                                        filteredAppointments.map((item, index) => (
+                                                                    </tr>
+                                                                ) : (
+                                                                    filteredAppointments.map((item, index) => (
                                                                         <tr key={item._id}>
                                                                             <td>{(page - 1) * 10 + index + 1}.</td>
 
                                                                             <td>#{item._id?.slice(-6)}</td>
 
                                                                             <td>
-                                                                            <div className="admin-table-bx">
-                                                                                <div className="admin-table-sub-bx">
-                                                                                <img
-                                                                                    src={item.patientId?.image || "/admin-tb-logo.png"}
-                                                                                    alt=""
-                                                                                />
-                                                                                <div className="admin-table-sub-details">
-                                                                                    <h6>{item.patientId?.name || "N/A"}</h6>
-                                                                                    <p>{item.patientId?.unique_id || "PA-0000"}</p>
+                                                                                <div className="admin-table-bx">
+                                                                                    <div className="admin-table-sub-bx">
+                                                                                        <img
+                                                                                            src={`${base_url}/${item.patientId?.patientId?.profileImage}` || "/admin-tb-logo.png"}
+                                                                                            alt=""
+                                                                                            onError={(e) => {
+                                                                                                e.target.src = "/admin-tb-logo.png";
+                                                                                            }}
+                                                                                        />
+                                                                                        <div className="admin-table-sub-details">
+                                                                                            <h6>{item.patientId?.name || "N/A"}</h6>
+                                                                                            <p>{item.patientId?.nh12 || "PA-0000"}</p>
+                                                                                        </div>
+                                                                                    </div>
                                                                                 </div>
-                                                                                </div>
-                                                                            </div>
                                                                             </td>
 
                                                                             <td>{formatDate(item.date)}</td>
 
                                                                             <td>
-                                                                            <div className="admin-table-bx">
-                                                                                <div className="admin-table-sub-bx">
-                                                                                <img
-                                                                                    src={doctor.image || "/doctor-avatr.png"}
-                                                                                    alt=""
-                                                                                />
-                                                                                <div className="admin-table-sub-details doctor-title">
-                                                                                    <h6>{doctor.name}</h6>
-                                                                                    <p>{doctor.user?.unique_id}</p>
+                                                                                <div className="admin-table-bx">
+                                                                                    <div className="admin-table-sub-bx">
+                                                                                        <img
+                                                                                            src={`${base_url}/${doctor?.profileImage}` || "/doctor-avatr.png"}
+                                                                                            alt=""
+                                                                                        />
+                                                                                        <div className="admin-table-sub-details doctor-title">
+                                                                                            <h6>{doctor.name}</h6>
+                                                                                            <p>{doctor.user?.unique_id}</p>
+                                                                                        </div>
+                                                                                    </div>
                                                                                 </div>
-                                                                                </div>
-                                                                            </div>
                                                                             </td>
 
                                                                             <td>
-                                                                            <span
-                                                                                className={`approved ${
-                                                                                item.status === "Completed"
-                                                                                    ? "approved-active"
-                                                                                    : item.status === "Pending"
-                                                                                    ? "approved-pending"
-                                                                                    : "approved-inactive"
-                                                                                }`}
-                                                                            >
-                                                                                {item.status || "Pending"}
-                                                                            </span>
+                                                                                <span
+                                                                                    className={`approved text-capitalize ${item.status === "Completed"
+                                                                                        ? "approved-active"
+                                                                                        : item.status === "Pending"
+                                                                                            ? "approved-pending"
+                                                                                            : "approved-inactive"
+                                                                                        }`}
+                                                                                >
+                                                                                    {item.status || "Pending"}
+                                                                                </span>
                                                                             </td>
 
                                                                             {/* <td>
@@ -563,9 +568,9 @@ function DoctorInfoDetails() {
                                                                             </a>
                                                                             </td> */}
                                                                         </tr>
-                                                                        ))
-                                                                    )}
-                                                                    </tbody>
+                                                                    ))
+                                                                )}
+                                                            </tbody>
 
                                                         </table>
                                                     </div>
@@ -578,41 +583,41 @@ function DoctorInfoDetails() {
                                                                 className="form-select custom-page-dropdown"
                                                                 value={page}
                                                                 onChange={(e) => setPage(Number(e.target.value))}
-                                                                >
+                                                            >
                                                                 {Array.from({ length: totalPages }, (_, i) => (
                                                                     <option key={i + 1} value={i + 1}>
-                                                                    {i + 1}
+                                                                        {i + 1}
                                                                     </option>
                                                                 ))}
-                                                                </select>
-                                                                <p className="ms-2">of {totalPages}</p>
+                                                            </select>
+                                                            <p className="ms-2">of {totalPages}</p>
                                                         </div>
 
                                                         <nav aria-label="Page navigation">
                                                             <ul className="pagination custom-pagination mb-0">
-                                                               <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
+                                                                <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
                                                                     <button className="page-link" onClick={() => setPage(1)}>
                                                                         <HiChevronDoubleLeft />
                                                                     </button>
-                                                                    </li>
+                                                                </li>
 
-                                                                    <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
+                                                                <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
                                                                     <button className="page-link" onClick={() => setPage(page - 1)}>
                                                                         <HiChevronLeft />
                                                                     </button>
-                                                                    </li>
+                                                                </li>
 
-                                                                    <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
+                                                                <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
                                                                     <button className="page-link" onClick={() => setPage(page + 1)}>
                                                                         <HiChevronRight />
                                                                     </button>
-                                                                    </li>
+                                                                </li>
 
-                                                                    <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
+                                                                <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
                                                                     <button className="page-link" onClick={() => setPage(totalPages)}>
                                                                         <HiChevronDoubleRight />
                                                                     </button>
-                                                                    </li>
+                                                                </li>
 
                                                             </ul>
                                                         </nav>
@@ -626,27 +631,27 @@ function DoctorInfoDetails() {
 
 
                                     <div className={`tab-pane fade ${activeTab === "card" ? "show active" : ""}`}
-                                      onMouseEnter={initCard}>
+                                        onMouseEnter={initCard}>
                                         <div className="row justify-content-between">
                                             <div className="col-lg-6 mb-3">
                                                 <div className="sub-tab-brd">
                                                     <div className="custom-frm-bx">
                                                         <label>Doctor Name</label>
                                                         <input type="text" className="form-control nw-select-frm"
-                                                          placeholder="Enter Name"
-                                                          value={cardName}
-                                                          onChange={e => { setCardName(e.target.value); setCardReady(false); }} />
+                                                            placeholder="Enter Name"
+                                                            value={cardName}
+                                                            onChange={e => { setCardName(e.target.value); setCardReady(false); }} />
                                                     </div>
                                                     <div className="custom-frm-bx">
                                                         <label>Doctor ID</label>
                                                         <input type="text" className="form-control nw-select-frm"
-                                                          placeholder="Enter ID"
-                                                          value={cardId}
-                                                          onChange={e => { setCardId(e.target.value); setCardReady(false); }} />
+                                                            placeholder="Enter ID"
+                                                            value={cardId}
+                                                            onChange={e => { setCardId(e.target.value); setCardReady(false); }} />
                                                     </div>
                                                     <div className="text-end">
                                                         <button className="nw-filtr-thm-btn" onClick={handleGenerate}
-                                                          disabled={!cardName}>Generate</button>
+                                                            disabled={!cardName}>Generate</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -661,28 +666,28 @@ function DoctorInfoDetails() {
                                                             <h6>{cardReady ? cardId : (doctor?.user?.nh12 || "NHCXXXXXXXX")}</h6>
                                                         </div>
                                                         <div className="qr-code-generate">
-                                                          {cardReady && (
-                                                            <QRCodeCanvas
-                                                              value={`NEOHEALTH:${cardId}:${cardName}`}
-                                                              size={60} level="M"
-                                                              bgColor="transparent" fgColor="#ffffff"
-                                                            />
-                                                          )}
+                                                            {cardReady && (
+                                                                <QRCodeCanvas
+                                                                    value={`NEOHEALTH:${cardId}:${cardName}`}
+                                                                    size={60} level="M"
+                                                                    bgColor="transparent" fgColor="#ffffff"
+                                                                />
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div>
                                                         <button className="patient-crd-down-btn"
-                                                          onClick={handleCardDownload}
-                                                          disabled={!cardReady}
-                                                          style={{opacity: cardReady ? 1 : 0.4}}>
-                                                          <FontAwesomeIcon icon={faDownload} />
+                                                            onClick={handleCardDownload}
+                                                            disabled={!cardReady}
+                                                            style={{ opacity: cardReady ? 1 : 0.4 }}>
+                                                            <FontAwesomeIcon icon={faDownload} />
                                                         </button>
                                                     </div>
                                                 </div>
                                                 {!cardReady && (
-                                                  <p className="text-center text-muted mt-2" style={{fontSize:12}}>
-                                                    Name confirm karo aur Generate dabao
-                                                  </p>
+                                                    <p className="text-center text-muted mt-2" style={{ fontSize: 12 }}>
+                                                        Name confirm karo aur Generate dabao
+                                                    </p>
                                                 )}
                                             </div>
                                         </div>

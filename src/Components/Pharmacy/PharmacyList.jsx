@@ -44,7 +44,7 @@ function PharmacyList() {
     loadPharmacies();
   }, [page]);
 
- 
+
 
   /* ================= STATUS ================= */
   const toggleStatus = async (id) => {
@@ -124,9 +124,9 @@ function PharmacyList() {
                   </div>
                 </div>
               </div>
-                  <div>
-                    <Link to={'/add-pharmacy'} className="thm-btn">Add Pharmacy</Link>
-                  </div>
+              <div>
+                <Link to={'/add-pharmacy'} className="thm-btn">Add Pharmacy</Link>
+              </div>
             </div>
           </div>
           {/* TABLE */}
@@ -184,7 +184,7 @@ function PharmacyList() {
                         {p?.contactPerson ?
                           <div className="admin-table-bx">
                             <div className="admin-table-sub-details d-flex align-items-center gap-2">
-                              <img src={p?.contactPerson?.photo ? base_url+'/' + p?.contactPerson?.photo : "/doctor-avatr.png"} alt="" />
+                              <img src={p?.contactPerson?.photo ? base_url + '/' + p?.contactPerson?.photo : "/doctor-avatr.png"} alt="" />
                               <h6>{p?.contactPerson?.name}</h6>
                             </div>
                             <ul className="ad-info-list">
@@ -194,8 +194,8 @@ function PharmacyList() {
                           </div> : '-'}
                       </td>
 
-                      <td>{p?.address ? p?.address?.fullAddress?.length>50?  p?.address?.fullAddress?.slice(0,47)+'...' 
-                      :p?.address?.fullAddress: "-"}</td>
+                      <td>{p?.address ? p?.address?.fullAddress?.length > 50 ? p?.address?.fullAddress?.slice(0, 47) + '...'
+                        : p?.address?.fullAddress : "-"}</td>
 
                       <td>
                         <span
@@ -218,7 +218,7 @@ function PharmacyList() {
                           <ul className="dropdown-menu dropdown-menu-end admin-dropdown-card">
                             <li className="prescription-item">
                               <NavLink
-                                to={`/pharmacy-info-details/${p.userId}`}
+                                to={`/pharmacy-info-details/${p.userId?._id}`}
                                 className="prescription-nav"
                               >
                                 View Details

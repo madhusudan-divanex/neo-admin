@@ -162,7 +162,7 @@ function LaboratoryList() {
                             {lab?.contactPerson ?
                               <div className="admin-table-bx">
                                 <div className="admin-table-sub-details d-flex align-items-center gap-2">
-                                  <img src={lab?.contactPerson?.photo ? base_url +'/'+ lab?.contactPerson?.photo : "/doctor-avatr.png"} alt="" />
+                                  <img src={lab?.contactPerson?.photo ? base_url + '/' + lab?.contactPerson?.photo : "/doctor-avatr.png"} alt="" />
                                   <h6>{lab?.contactPerson?.name}</h6>
                                 </div>
                                 <ul className="ad-info-list">
@@ -203,7 +203,7 @@ function LaboratoryList() {
                               <ul className="dropdown-menu dropdown-menu-end">
                                 <li>
                                   <NavLink
-                                    to={`/lab-info-details/${lab.userId}`}
+                                    to={`/lab-info-details/${lab.userId?._id}`}
                                     className="prescription-nav"
                                   >
                                     View Details
